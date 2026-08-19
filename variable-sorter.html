@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QUA107 · Chapter 1 · Variable Sorter</title>
+<style>
+  :root{--blue:#008DC3;--blue-dark:#0075A3;--grey:#748995;--cream:#E3E0D2;--ink:#1d2731;--ok:#1f9d55;--bad:#d64545;--card:#ffffff}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--cream);color:var(--ink);line-height:1.4}
+  header{background:var(--blue);color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  header h1{margin:0;font-size:1.25rem;letter-spacing:.2px}
+  header .sub{font-size:.85rem;opacity:.9}
+  .wrap{max-width:1100px;margin:0 auto;padding:18px}
+  .hud{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+  .stat{background:var(--card);border-radius:12px;padding:10px 14px;min-width:120px;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+  .stat .lbl{font-size:.72rem;color:var(--grey);text-transform:uppercase;letter-spacing:.06em}
+  .stat .val{font-size:1.4rem;font-weight:700;color:var(--blue-dark)}
+  .panel{background:var(--card);border-radius:16px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.08);margin-bottom:16px}
+  .btn{background:var(--blue);color:#fff;border:0;border-radius:999px;padding:10px 20px;font-size:1rem;cursor:pointer;font-weight:600}
+  .btn:hover{background:var(--blue-dark)}
+  .btn.ghost{background:transparent;color:var(--blue-dark);border:2px solid var(--blue)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+  .mode{border:2px solid #e2e6ea;border-radius:14px;padding:16px;cursor:pointer;transition:.15s}
+  .mode:hover{border-color:var(--blue);transform:translateY(-2px)}
+  .mode h3{margin:0 0 6px;color:var(--blue-dark)}
+  .mode p{margin:0;font-size:.92rem;color:#445}
+  .card{background:#fff;border:2px solid var(--blue);border-radius:14px;padding:22px;font-size:1.25rem;font-weight:600;text-align:center;min-height:96px;display:flex;align-items:center;justify-content:center;cursor:grab;user-select:none;box-shadow:0 4px 12px rgba(0,141,195,.15)}
+  .card.dragging{opacity:.5}
+  .bins{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:14px}
+  .bin{border:3px dashed var(--grey);border-radius:14px;padding:16px;min-height:110px;text-align:center;cursor:pointer;background:#fafaf7;transition:.15s}
+  .bin:hover,.bin.over{border-color:var(--blue);background:#eaf6fb}
+  .bin h4{margin:0 0 4px;font-size:1.02rem;color:var(--ink)}
+  .bin small{color:var(--grey)}
+  .bin.right,.bin.right:hover{border-color:var(--ok);background:#e9f7ee}
+  .bin.wrong,.bin.wrong:hover{border-color:var(--bad);background:#fdecec}
+  .feedback{margin-top:14px;padding:12px 14px;border-radius:12px;font-size:1rem;display:none}
+  .feedback.ok{display:block;background:#e9f7ee;border-left:6px solid var(--ok)}
+  .feedback.bad{display:block;background:#fdecec;border-left:6px solid var(--bad)}
+  .progress{height:10px;background:#e2e6ea;border-radius:99px;overflow:hidden;margin:10px 0}
+  .progress div{height:100%;background:var(--blue);width:0;transition:.3s}
+  .hint{font-size:.9rem;color:var(--grey)}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+  table{border-collapse:collapse;width:100%;font-size:.92rem}
+  th,td{border-bottom:1px solid #e2e6ea;padding:8px;text-align:left;vertical-align:top}
+  th{background:#eef5f8;color:var(--blue-dark)}
+  .tag{display:inline-block;padding:2px 8px;border-radius:99px;font-size:.78rem;background:#eef5f8;color:var(--blue-dark);margin-right:4px}
+  .badge{font-size:2.2rem}
+  footer{text-align:center;color:var(--grey);font-size:.8rem;padding:14px}
+  @media (max-width:600px){.card{font-size:1.05rem}}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>Variable Sorter</h1><div class="sub">QUA 107 · Chapter 1 · LO 1-2 · Classify variables and levels of measurement</div></div>
+  <div class="sub" style="text-align:right">King Saud University · College of Business Administration<br><a href="../../../index.html" style="color:inherit;text-decoration:underline">QUA 107 course page</a> · <a href="../slides.html" style="color:inherit;text-decoration:underline">Chapter 1 slides</a></div>
+</header>
+<div class="wrap">
+
+  <!-- MENU -->
+  <div id="menu" class="panel">
+    <h2 style="margin-top:0;color:var(--blue-dark)">Choose a round</h2>
+    <p class="hint">Drag the variable card into the correct box (or tap the card, then tap the box). You get instant feedback and an explanation. 12 cards per round.</p>
+    <div class="modes">
+      <div class="mode" onclick="start('qq')"><h3>Round 1 · Word or number?</h3><p>Qualitative vs. quantitative. The first question you always ask.</p></div>
+      <div class="mode" onclick="start('dc')"><h3>Round 2 · Count or measure?</h3><p>Discrete vs. continuous (quantitative variables only).</p></div>
+      <div class="mode" onclick="start('full')"><h3>Round 3 · Full classification</h3><p>Qualitative nominal / ordinal, quantitative discrete / continuous.</p></div>
+      <div class="mode" onclick="start('level')"><h3>Round 4 · Level of measurement</h3><p>Nominal, ordinal, interval or ratio – the N-O-I-R ladder.</p></div>
+      <div class="mode" onclick="start('mix')"><h3>Challenge · Mixed 20 cards</h3><p>All four rounds mixed, longer streak, best-time board.</p></div>
+    </div>
+    <div style="margin-top:14px" class="hint"><strong>Rules used in this course:</strong> counts are discrete; measured amounts (including money and percentages) are continuous; ratings like 1–5 stars are ordinal; ID numbers and postal codes are nominal.</div>
+  </div>
+
+  <!-- GAME -->
+  <div id="game" style="display:none">
+    <div class="hud">
+      <div class="stat"><div class="lbl">Round</div><div class="val" id="roundName">–</div></div>
+      <div class="stat"><div class="lbl">Card</div><div class="val" id="cardNo">0 / 0</div></div>
+      <div class="stat"><div class="lbl">Score</div><div class="val" id="score">0</div></div>
+      <div class="stat"><div class="lbl">Streak</div><div class="val" id="streak">0</div></div>
+      <div class="stat"><div class="lbl">Time</div><div class="val" id="time">0 s</div></div>
+    </div>
+    <div class="progress"><div id="bar"></div></div>
+    <div class="panel">
+      <div class="hint" id="prompt">Where does this variable belong?</div>
+      <div class="card" id="card" draggable="true">…</div>
+      <div class="bins" id="bins"></div>
+      <div class="feedback" id="fb"></div>
+      <div class="row" style="margin-top:14px">
+        <button class="btn ghost" onclick="backToMenu()">Menu</button>
+        <button class="btn" id="nextBtn" onclick="next()" disabled>Next ▶</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="results" class="panel" style="display:none">
+    <div class="row"><h2 style="margin:0;color:var(--blue-dark)">Round complete</h2><div class="badge" id="badge">🏅</div></div>
+    <p id="summary" style="font-size:1.1rem"></p>
+    <table id="review"><thead><tr><th>Variable</th><th>Correct answer</th><th>Your answer</th></tr></thead><tbody></tbody></table>
+    <div class="row" style="margin-top:14px">
+      <button class="btn ghost" onclick="backToMenu()">Menu</button>
+      <button class="btn" onclick="start(currentMode)">Play again</button>
+    </div>
+  </div>
+</div>
+<footer>QUA 107 · Introduction to Business Statistics · Practice game (not graded).</footer>
+
+<script>
+const VARS=[{"t": "Nationality of a customer", "k": "QL", "d": null, "l": "nominal"}, {"t": "Gender of an employee", "k": "QL", "d": null, "l": "nominal"}, {"t": "Brand of smartphone a student uses (Apple, Samsung, Huawei, ...)", "k": "QL", "d": null, "l": "nominal"}, {"t": "Payment method used at checkout (cash, mada, Apple Pay, credit card)", "k": "QL", "d": null, "l": "nominal"}, {"t": "City where a branch is located", "k": "QL", "d": null, "l": "nominal"}, {"t": "Color of a car", "k": "QL", "d": null, "l": "nominal"}, {"t": "Employee ID number (used only to identify the employee)", "k": "QL", "d": null, "l": "nominal"}, {"t": "Marital status (single, married, divorced, widowed)", "k": "QL", "d": null, "l": "nominal"}, {"t": "Type of bank account (current, savings, investment)", "k": "QL", "d": null, "l": "nominal"}, {"t": "Industry sector of a company (banking, retail, energy, health)", "k": "QL", "d": null, "l": "nominal"}, {"t": "Department where an employee works (HR, finance, marketing, IT)", "k": "QL", "d": null, "l": "nominal"}, {"t": "Answer to the question \"Do you own a car?\" (yes / no)", "k": "QL", "d": null, "l": "nominal"}, {"t": "Mobile network provider (stc, Mobily, Zain)", "k": "QL", "d": null, "l": "nominal"}, {"t": "Postal code of a customer's address", "k": "QL", "d": null, "l": "nominal"}, {"t": "Type of fuel a car uses (91, 95, diesel, electric)", "k": "QL", "d": null, "l": "nominal"}, {"t": "Airline a passenger flew with", "k": "QL", "d": null, "l": "nominal"}, {"t": "Product category (food, electronics, clothing, furniture)", "k": "QL", "d": null, "l": "nominal"}, {"t": "Car license plate number", "k": "QL", "d": null, "l": "nominal"}, {"t": "Customer satisfaction rating (very unhappy, unhappy, neutral, happy, very happy)", "k": "QL", "d": null, "l": "ordinal"}, {"t": "Hotel star rating (1 star to 5 stars)", "k": "QL", "d": null, "l": "ordinal"}, {"t": "Highest education level (high school, bachelor, master, PhD)", "k": "QL", "d": null, "l": "ordinal"}, {"t": "T-shirt size (S, M, L, XL)", "k": "QL", "d": null, "l": "ordinal"}, {"t": "Job level (junior, senior, manager, director)", "k": "QL", "d": null, "l": "ordinal"}, {"t": "Credit rating of a company (AAA, AA, A, BBB, ...)", "k": "QL", "d": null, "l": "ordinal"}, {"t": "Level of agreement with a statement (strongly disagree ... strongly agree)", "k": "QL", "d": null, "l": "ordinal"}, {"t": "Final position of a football team in the Saudi Pro League table (1st, 2nd, 3rd, ...)", "k": "QL", "d": null, "l": "ordinal"}, {"t": "Airline travel class (economy, business, first)", "k": "QL", "d": null, "l": "ordinal"}, {"t": "Priority of a customer complaint (low, medium, high)", "k": "QL", "d": null, "l": "ordinal"}, {"t": "Spice level of a dish (mild, medium, hot)", "k": "QL", "d": null, "l": "ordinal"}, {"t": "Grade letter in a course (A, B, C, D, F)", "k": "QL", "d": null, "l": "ordinal"}, {"t": "Restaurant rating on a delivery app (1 to 5 stars)", "k": "QL", "d": null, "l": "ordinal"}, {"t": "Size of a coffee cup (small, medium, large)", "k": "QL", "d": null, "l": "ordinal"}, {"t": "Employee performance category (below expectations, meets expectations, exceeds expectations)", "k": "QL", "d": null, "l": "ordinal"}, {"t": "Income bracket (low, middle, high)", "k": "QL", "d": null, "l": "ordinal"}, {"t": "Temperature in Riyadh at noon, in degrees Celsius", "k": "QN", "d": "C", "l": "interval"}, {"t": "Year a company was founded", "k": "QN", "d": "D", "l": "interval"}, {"t": "IQ score of a job applicant", "k": "QN", "d": "D", "l": "interval"}, {"t": "Temperature of a warehouse freezer, in degrees Fahrenheit", "k": "QN", "d": "C", "l": "interval"}, {"t": "Calendar year in which a store opened (2019, 2020, ...)", "k": "QN", "d": "D", "l": "interval"}, {"t": "Number of employees in a company", "k": "QN", "d": "D", "l": "ratio"}, {"t": "Number of customer complaints received per day", "k": "QN", "d": "D", "l": "ratio"}, {"t": "Number of defective items in a batch of 500", "k": "QN", "d": "D", "l": "ratio"}, {"t": "Number of branches a bank has", "k": "QN", "d": "D", "l": "ratio"}, {"t": "Number of cars sold by a dealership last month", "k": "QN", "d": "D", "l": "ratio"}, {"t": "Number of children in a family", "k": "QN", "d": "D", "l": "ratio"}, {"t": "Number of orders delivered by a driver in one shift", "k": "QN", "d": "D", "l": "ratio"}, {"t": "Number of students registered in a section", "k": "QN", "d": "D", "l": "ratio"}, {"t": "Number of flights a passenger took last year", "k": "QN", "d": "D", "l": "ratio"}, {"t": "Number of items on a customer's receipt", "k": "QN", "d": "D", "l": "ratio"}, {"t": "Number of laptops in stock at a store", "k": "QN", "d": "D", "l": "ratio"}, {"t": "Number of times a customer visited the app last week", "k": "QN", "d": "D", "l": "ratio"}, {"t": "Monthly salary of an employee, in SAR", "k": "QN", "d": "C", "l": "ratio"}, {"t": "Age of a customer, in years", "k": "QN", "d": "C", "l": "ratio"}, {"t": "Weight of a burger, in grams", "k": "QN", "d": "C", "l": "ratio"}, {"t": "Height of a job applicant, in cm", "k": "QN", "d": "C", "l": "ratio"}, {"t": "Annual revenue of a company, in million SAR", "k": "QN", "d": "C", "l": "ratio"}, {"t": "Distance between two branches, in km", "k": "QN", "d": "C", "l": "ratio"}, {"t": "Time to complete an online order, in minutes", "k": "QN", "d": "C", "l": "ratio"}, {"t": "Waiting time at a bank teller, in minutes", "k": "QN", "d": "C", "l": "ratio"}, {"t": "Price of a share on the Saudi Exchange, in SAR", "k": "QN", "d": "C", "l": "ratio"}, {"t": "Market share of a company, in percent", "k": "QN", "d": "C", "l": "ratio"}, {"t": "Fuel consumption of a car, in liters per 100 km", "k": "QN", "d": "C", "l": "ratio"}, {"t": "Amount spent per visit at a supermarket, in SAR", "k": "QN", "d": "C", "l": "ratio"}, {"t": "Volume of juice in a bottle, in ml", "k": "QN", "d": "C", "l": "ratio"}, {"t": "Monthly electricity bill of a villa, in SAR", "k": "QN", "d": "C", "l": "ratio"}, {"t": "Download speed of an internet connection, in Mbps", "k": "QN", "d": "C", "l": "ratio"}, {"t": "Delivery time of a package, in hours", "k": "QN", "d": "C", "l": "ratio"}, {"t": "Area of an apartment, in square meters", "k": "QN", "d": "C", "l": "ratio"}, {"t": "Unemployment rate in a region, in percent", "k": "QN", "d": "C", "l": "ratio"}, {"t": "Weight of a shipment, in kg", "k": "QN", "d": "C", "l": "ratio"}, {"t": "Length of a phone call, in seconds", "k": "QN", "d": "C", "l": "ratio"}];
+const SCEN=[{"org": "Panda", "story": "Panda wants to know the average amount its Riyadh shoppers spend per visit. Staff interview 200 shoppers leaving the Exit 5 branch on Saturday.", "pop": "All Panda shoppers in Riyadh", "sample": "The 200 shoppers interviewed at the Exit 5 branch", "indiv": "One shopper leaving the Exit 5 branch", "wrong": "All Panda employees in Riyadh", "measure": "average spending per visit", "value": "186 SAR", "n": 200}, {"org": "Almarai", "story": "Almarai wants to check the sugar level of the 12,000 bottles of orange juice produced today. Technicians test 50 bottles from the line.", "pop": "All 12,000 bottles of orange juice produced today", "sample": "The 50 bottles that were tested", "indiv": "One bottle taken from the line", "wrong": "All dairy products sold by Almarai", "measure": "average sugar level (grams per 100 ml)", "value": "9.4 g", "n": 50}, {"org": "Jarir Bookstore", "story": "Jarir Bookstore is thinking about opening a branch in North Riyadh. It phones 500 residents of North Riyadh and asks if they would shop there.", "pop": "All residents of North Riyadh", "sample": "The 500 residents who were phoned", "indiv": "One resident who answered the phone", "wrong": "All Jarir customers in Saudi Arabia", "measure": "percentage who would shop at the new branch", "value": "64%", "n": 500}, {"org": "KSU College of Business", "story": "The College of Business Administration at KSU wants the average starting salary of its 1,850 graduates of 2025. It emails a survey to 150 of them.", "pop": "All 1,850 graduates of 2025 from the KSU College of Business", "sample": "The 150 graduates who received the survey", "indiv": "One graduate who replied", "wrong": "All students now studying at KSU", "measure": "average starting salary", "value": "8,900 SAR", "n": 150}, {"org": "stc", "story": "stc wants to measure the internet speed of its 5G customers in Jeddah. It monitors the connections of 1,000 randomly chosen 5G users for 24 hours.", "pop": "All stc 5G customers in Jeddah", "sample": "The 1,000 users whose connections were monitored", "indiv": "One 5G user in central Jeddah", "wrong": "All people in Saudi Arabia who own a mobile phone", "measure": "average download speed", "value": "312 Mbps", "n": 1000}, {"org": "Maestro Pizza", "story": "Maestro Pizza wants to know the most popular topping among teenagers in Riyadh. It surveys 300 teenagers at Riyadh Park mall.", "pop": "All teenagers in Riyadh", "sample": "The 300 teenagers surveyed at Riyadh Park", "indiv": "One teenager eating pizza at the mall", "wrong": "All Maestro Pizza customers", "measure": "percentage who prefer chicken topping", "value": "41%", "n": 300}, {"org": "SNB", "story": "SNB wants to know whether its 2.4 million credit-card holders are satisfied with the rewards program. It sends a text-message survey to 2,000 cardholders.", "pop": "All 2.4 million SNB credit-card holders", "sample": "The 2,000 cardholders who received the text message", "indiv": "One cardholder visiting an SNB branch", "wrong": "All customers of all Saudi banks", "measure": "percentage satisfied with the rewards program", "value": "71%", "n": 2000}, {"org": "noon", "story": "noon wants the average delivery time of packages sent to Dammam. It tracks 400 packages delivered last week.", "pop": "All noon packages delivered to Dammam", "sample": "The 400 packages tracked last week", "indiv": "One package delivered on Monday", "wrong": "All noon shoppers in Saudi Arabia", "measure": "average delivery time", "value": "1.8 days", "n": 400}, {"org": "Ministry of Health", "story": "The Ministry of Health wants the percentage of adults in Saudi Arabia who exercise at least three times a week. It calls 3,000 adults across the Kingdom.", "pop": "All adults in Saudi Arabia", "sample": "The 3,000 adults who were called", "indiv": "One adult who goes to the gym daily", "wrong": "All patients in government hospitals", "measure": "percentage who exercise three times a week", "value": "27%", "n": 3000}, {"org": "HungerStation", "story": "HungerStation wants to evaluate driver politeness in Khobar. It reviews the ratings of 1,500 orders delivered in Khobar last weekend.", "pop": "All HungerStation orders delivered in Khobar", "sample": "The 1,500 orders reviewed from last weekend", "indiv": "One driver delivering in Khobar", "wrong": "All people in Khobar who have the app", "measure": "average politeness rating", "value": "4.6 out of 5", "n": 1500}, {"org": "Al Rajhi Bank", "story": "Al Rajhi Bank wants the opinion of its female customers about the new app design. It interviews 250 women at different branches.", "pop": "All female customers of Al Rajhi Bank", "sample": "The 250 women who were interviewed", "indiv": "One woman using the app at home", "wrong": "All Al Rajhi Bank employees", "measure": "percentage who like the new design", "value": "83%", "n": 250}, {"org": "Mobily", "story": "Mobily wants to know why customers cancelled their service last month. It calls 100 of the 4,200 customers who cancelled.", "pop": "All 4,200 customers who cancelled Mobily service last month", "sample": "The 100 cancelled customers who were called", "indiv": "One customer who decided to stay with Mobily", "wrong": "All current Mobily customers", "measure": "percentage who left because of price", "value": "46%", "n": 100}, {"org": "Saudi Aramco", "story": "Saudi Aramco wants the average number of safety-training hours completed this year by its engineers. A supervisor checks the records of 120 engineers.", "pop": "All Saudi Aramco engineers", "sample": "The 120 engineers whose records were checked", "indiv": "One engineer at the Ras Tanura refinery", "wrong": "All Saudi Aramco employees, including office staff", "measure": "average safety-training hours", "value": "26 hours", "n": 120}, {"org": "Riyadh Metro", "story": "Riyadh Metro wants to know how many minutes passengers wait at Blue Line stations in the morning. Staff time the wait of 600 passengers.", "pop": "All passengers using Blue Line stations in the morning", "sample": "The 600 passengers whose wait was timed", "indiv": "One passenger at King Abdullah Financial District station", "wrong": "All residents of Riyadh", "measure": "average waiting time", "value": "4.2 minutes", "n": 600}, {"org": "Herfy", "story": "Herfy wants its burgers to have the same weight in every branch. Quality staff weigh 60 burgers from its Dammam branches.", "pop": "All burgers made in Herfy's Dammam branches", "sample": "The 60 burgers that were weighed", "indiv": "One burger served at lunch time", "wrong": "All customers who eat at Herfy", "measure": "average burger weight", "value": "148 grams", "n": 60}, {"org": "ZATCA", "story": "ZATCA wants to know if small businesses find the e-invoicing system easy to use. It surveys 400 of the 380,000 registered small businesses.", "pop": "All 380,000 registered small businesses in Saudi Arabia", "sample": "The 400 small businesses that were surveyed", "indiv": "One accountant at a small shop", "wrong": "All large companies listed on Tadawul", "measure": "percentage that find the system easy", "value": "68%", "n": 400}, {"org": "Tawuniya", "story": "Tawuniya wants the average cost of car-repair claims in 2025. An analyst reviews 500 claim files from the database of 92,000 claims.", "pop": "All 92,000 car-repair claims made to Tawuniya in 2025", "sample": "The 500 claim files that were reviewed", "indiv": "One driver who had an accident in 2025", "wrong": "All cars registered in Saudi Arabia", "measure": "average claim cost", "value": "6,350 SAR", "n": 500}, {"org": "Fitness Time", "story": "Fitness Time wants to know why members stop coming. It contacts 200 former members whose memberships expired and were not renewed.", "pop": "All former Fitness Time members who did not renew", "sample": "The 200 former members who were contacted", "indiv": "One person who has never joined a gym", "wrong": "All current active members of Fitness Time", "measure": "percentage who left because the branch was far", "value": "35%", "n": 200}, {"org": "Saudia", "story": "Saudia wants the average delay of its domestic flights this summer. An analyst takes the records of 350 flights out of the 9,800 domestic flights flown.", "pop": "All 9,800 domestic flights flown by Saudia this summer", "sample": "The 350 flights whose records were taken", "indiv": "One flight from Riyadh to Jeddah", "wrong": "All flights of all airlines in Saudi Arabia", "measure": "average delay", "value": "11 minutes", "n": 350}, {"org": "Jahez", "story": "Jahez wants the average time from order to delivery in Makkah. It studies 800 orders delivered in Makkah during Ramadan.", "pop": "All Jahez orders delivered in Makkah during Ramadan", "sample": "The 800 orders that were studied", "indiv": "One order delivered after Iftar", "wrong": "All Jahez restaurants in Makkah", "measure": "average delivery time", "value": "34 minutes", "n": 800}, {"org": "Nahdi Pharmacy", "story": "Nahdi wants the average number of items per customer receipt in its Jeddah branches. It looks at 1,200 receipts from last month.", "pop": "All customer receipts from Nahdi's Jeddah branches", "sample": "The 1,200 receipts from last month that were examined", "indiv": "One receipt from the Al Rawdah branch", "wrong": "All Nahdi employees in Jeddah", "measure": "average number of items per receipt", "value": "3.4 items", "n": 1200}, {"org": "Careem", "story": "Careem wants to know the percentage of its Riyadh drivers who own their car. It surveys 450 of its 21,000 Riyadh drivers.", "pop": "All 21,000 Careem drivers in Riyadh", "sample": "The 450 drivers who were surveyed", "indiv": "One driver waiting at the airport", "wrong": "All Careem passengers in Riyadh", "measure": "percentage who own their car", "value": "58%", "n": 450}, {"org": "SABIC", "story": "SABIC wants the average strength of the plastic pellets made in a batch of 50,000 kg. The lab tests 40 samples of 1 kg each.", "pop": "All 50,000 kg of pellets in the batch", "sample": "The 40 one-kilogram samples that were tested", "indiv": "One kilogram of pellets", "wrong": "All products made by SABIC this year", "measure": "average strength", "value": "42 MPa", "n": 40}, {"org": "Al Baik", "story": "Al Baik wants the average waiting time of customers at its Jeddah drive-through windows. Staff time 300 cars on a Thursday evening.", "pop": "All customers at Al Baik drive-through windows in Jeddah", "sample": "The 300 cars timed on Thursday evening", "indiv": "One car at the Corniche branch", "wrong": "All Al Baik kitchen staff", "measure": "average waiting time", "value": "6.5 minutes", "n": 300}, {"org": "Riyad Bank", "story": "Riyad Bank wants to know what percentage of its 3,600 branch employees would like to work from home two days a week. HR surveys 240 employees.", "pop": "All 3,600 branch employees of Riyad Bank", "sample": "The 240 employees surveyed by HR", "indiv": "One teller in Al Malaz branch", "wrong": "All customers of Riyad Bank", "measure": "percentage who want to work from home two days", "value": "77%", "n": 240}, {"org": "Extra Stores", "story": "Extra wants the average age of customers who bought a gaming laptop in 2025. It checks 700 loyalty-card records of the 15,000 gaming-laptop buyers.", "pop": "All 15,000 customers who bought a gaming laptop from Extra in 2025", "sample": "The 700 loyalty-card records that were checked", "indiv": "One customer buying a laptop online", "wrong": "All Extra customers", "measure": "average age", "value": "24.7 years", "n": 700}, {"org": "Saudi Electricity Company", "story": "SEC wants the average summer electricity bill of villas in Dammam. It selects 900 villa accounts and records the July bill.", "pop": "All villa accounts of SEC in Dammam", "sample": "The 900 villa accounts selected", "indiv": "One villa in Al Faisaliyah district", "wrong": "All apartments in Dammam", "measure": "average July bill", "value": "1,240 SAR", "n": 900}, {"org": "Almosafer", "story": "Almosafer wants the percentage of Saudi travelers who book hotels using a phone app. It surveys 1,100 travelers at King Khalid Airport.", "pop": "All Saudi travelers", "sample": "The 1,100 travelers surveyed at King Khalid Airport", "indiv": "One traveler flying to Dubai", "wrong": "All employees of Almosafer", "measure": "percentage who book with a phone app", "value": "62%", "n": 1100}, {"org": "Sadafco", "story": "Sadafco wants the average fat content of the 80,000 cartons of milk produced this week. Quality control tests 60 cartons.", "pop": "All 80,000 cartons of milk produced this week", "sample": "The 60 cartons tested", "indiv": "One carton on the shelf", "wrong": "All Sadafco products, including juices", "measure": "average fat content", "value": "3.1%", "n": 60}, {"org": "Ministry of Education", "story": "The Ministry of Education wants the average number of hours secondary-school students in Riyadh study per week. It surveys 2,500 students in 40 schools.", "pop": "All secondary-school students in Riyadh", "sample": "The 2,500 students surveyed in 40 schools", "indiv": "One student in grade 11", "wrong": "All teachers in Riyadh", "measure": "average weekly study hours", "value": "9.6 hours", "n": 2500}, {"org": "Alinma Bank", "story": "Alinma Bank wants the percentage of its 5.2 million customers who used the app at least once last month. The data team looks at 10,000 randomly chosen accounts.", "pop": "All 5.2 million Alinma Bank customers", "sample": "The 10,000 randomly chosen accounts", "indiv": "One customer who opened an account last week", "wrong": "All bank customers in the GCC", "measure": "percentage who used the app last month", "value": "88%", "n": 10000}, {"org": "Red Sea Global", "story": "Red Sea Global wants the average satisfaction score of guests at its resorts this year. It emails a survey to 1,600 of the 42,000 guests.", "pop": "All 42,000 guests who stayed at Red Sea Global resorts this year", "sample": "The 1,600 guests who were emailed", "indiv": "One guest at the Six Senses resort", "wrong": "All tourists who visited Saudi Arabia", "measure": "average satisfaction score", "value": "8.7 out of 10", "n": 1600}, {"org": "Lulu Hypermarket", "story": "Lulu wants the average number of minutes shoppers wait at checkout in its Riyadh stores. Staff time 500 shoppers on a weekday.", "pop": "All shoppers at checkout in Lulu's Riyadh stores", "sample": "The 500 shoppers timed on a weekday", "indiv": "One shopper at the Atyaf Mall branch", "wrong": "All Lulu cashiers", "measure": "average checkout waiting time", "value": "5.1 minutes", "n": 500}, {"org": "Flynas", "story": "Flynas wants the percentage of its passengers who buy an extra bag. It checks 2,000 bookings out of the 1.9 million bookings made last quarter.", "pop": "All 1.9 million Flynas bookings made last quarter", "sample": "The 2,000 bookings that were checked", "indiv": "One passenger flying to Cairo", "wrong": "All Flynas cabin crew", "measure": "percentage who bought an extra bag", "value": "23%", "n": 2000}, {"org": "Abdul Latif Jameel Motors", "story": "Abdul Latif Jameel wants the average kilometers driven per year by owners of a Toyota Camry bought in 2024. It surveys 380 owners.", "pop": "All owners of a Toyota Camry bought from Abdul Latif Jameel in 2024", "sample": "The 380 owners who were surveyed", "indiv": "One owner living in Buraidah", "wrong": "All car owners in Saudi Arabia", "measure": "average kilometers driven per year", "value": "22,400 km", "n": 380}, {"org": "Tamimi Markets", "story": "Tamimi Markets wants to know what percentage of shoppers use the self-checkout. Staff observe 350 shoppers at the Khobar branch.", "pop": "All shoppers at Tamimi Markets", "sample": "The 350 shoppers observed at the Khobar branch", "indiv": "One shopper paying with mada", "wrong": "All supermarkets in Khobar", "measure": "percentage using self-checkout", "value": "39%", "n": 350}, {"org": "KSU Library", "story": "The KSU library wants the average number of books borrowed per student this semester. It checks the records of 600 of the 65,000 KSU students.", "pop": "All 65,000 KSU students", "sample": "The 600 students whose records were checked", "indiv": "One student in the College of Engineering", "wrong": "All KSU professors", "measure": "average books borrowed", "value": "2.3 books", "n": 600}, {"org": "Salla", "story": "Salla wants the average monthly sales of the online stores on its platform. It analyzes 900 stores from the 60,000 stores registered.", "pop": "All 60,000 online stores registered on Salla", "sample": "The 900 stores that were analyzed", "indiv": "One store selling perfumes", "wrong": "All online shoppers in Saudi Arabia", "measure": "average monthly sales", "value": "14,200 SAR", "n": 900}, {"org": "Saudi Post (SPL)", "story": "SPL wants the percentage of parcels in Riyadh delivered on the first attempt. It tracks 1,000 parcels from last week.", "pop": "All parcels delivered by SPL in Riyadh", "sample": "The 1,000 parcels tracked last week", "indiv": "One parcel sent to Al Olaya", "wrong": "All SPL delivery drivers", "measure": "percentage delivered on the first attempt", "value": "91%", "n": 1000}, {"org": "Dr. Sulaiman Al Habib Hospital", "story": "The hospital wants the average time patients spend in the emergency waiting room. Staff record the waiting time of 450 patients in March.", "pop": "All emergency patients at the hospital", "sample": "The 450 patients recorded in March", "indiv": "One patient who arrived at midnight", "wrong": "All doctors working in the emergency department", "measure": "average waiting time", "value": "38 minutes", "n": 450}];
+
+
+const LEVEL_WHY = {
+  nominal:"the values are only names or categories with no natural order.",
+  ordinal:"the values can be put in order, but the distance between them is not equal or not measurable.",
+  interval:"the values are numbers with equal distances, but zero does not mean 'nothing', so ratios are meaningless.",
+  ratio:"the values are numbers with equal distances AND a true zero, so ratios (twice as much) make sense."};
+const MODES = {
+  qq:  {name:"Word or number?", bins:[
+        {id:"QL",title:"Qualitative",sub:"category / label"},{id:"QN",title:"Quantitative",sub:"a number (counted or measured)"}],
+        pool:()=>VARS, answer:v=>v.k, n:12},
+  dc:  {name:"Count or measure?", bins:[
+        {id:"D",title:"Discrete",sub:"counted: 0, 1, 2 …"},{id:"C",title:"Continuous",sub:"measured: any value in a range"}],
+        pool:()=>VARS.filter(v=>v.k==="QN"), answer:v=>v.d, n:12},
+  full:{name:"Full classification", bins:[
+        {id:"QL-nominal",title:"Qualitative · nominal",sub:"names, no order"},{id:"QL-ordinal",title:"Qualitative · ordinal",sub:"ordered categories"},
+        {id:"QN-D",title:"Quantitative · discrete",sub:"counted"},{id:"QN-C",title:"Quantitative · continuous",sub:"measured"}],
+        pool:()=>VARS, answer:v=>v.k==="QL"?("QL-"+v.l):("QN-"+v.d), n:12},
+  level:{name:"Level of measurement", bins:[
+        {id:"nominal",title:"Nominal",sub:"names only"},{id:"ordinal",title:"Ordinal",sub:"+ order"},
+        {id:"interval",title:"Interval",sub:"+ equal steps, no true zero"},{id:"ratio",title:"Ratio",sub:"+ true zero"}],
+        pool:()=>VARS, answer:v=>v.l, n:12},
+};
+MODES.mix = {name:"Mixed challenge", n:20, mixed:true};
+
+let currentMode=null, deck=[], idx=0, score=0, streak=0, best=0, answered=false, timer=null, t0=0, log=[], selectedCard=false, subMode=null;
+const $=id=>document.getElementById(id);
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+
+function start(mode){
+  currentMode=mode; idx=0; score=0; streak=0; best=0; log=[];
+  const m=MODES[mode];
+  if(m.mixed){
+    deck=[]; const keys=["qq","dc","full","level"];
+    for(let i=0;i<m.n;i++){const k=keys[i%4]; const p=MODES[k].pool(); deck.push({v:p[Math.floor(Math.random()*p.length)],sub:k});}
+    shuffle(deck);
+  } else {
+    deck=shuffle(m.pool().slice()).slice(0,m.n).map(v=>({v,sub:mode}));
+  }
+  $("menu").style.display="none"; $("results").style.display="none"; $("game").style.display="block";
+  $("roundName").textContent=m.name; t0=Date.now(); clearInterval(timer);
+  timer=setInterval(()=>{$("time").textContent=Math.round((Date.now()-t0)/1000)+" s"},500);
+  showCard();
+}
+function showCard(){
+  answered=false; selectedCard=false;
+  const item=deck[idx]; subMode=item.sub; const m=MODES[subMode];
+  $("cardNo").textContent=(idx+1)+" / "+deck.length; $("score").textContent=score; $("streak").textContent=streak;
+  $("bar").style.width=(idx/deck.length*100)+"%";
+  $("prompt").textContent = {qq:"Is this variable qualitative or quantitative?",dc:"Is this quantitative variable discrete or continuous?",full:"Give the full classification of this variable.",level:"What is the level of measurement?"}[subMode];
+  const card=$("card"); card.textContent=item.v.t; card.classList.remove("dragging"); card.style.borderColor="var(--blue)";
+  const bins=$("bins"); bins.innerHTML="";
+  m.bins.forEach(b=>{
+    const d=document.createElement("div"); d.className="bin"; d.dataset.id=b.id;
+    d.innerHTML=`<h4>${b.title}</h4><small>${b.sub}</small>`;
+    d.addEventListener("dragover",e=>{e.preventDefault();d.classList.add("over")});
+    d.addEventListener("dragleave",()=>d.classList.remove("over"));
+    d.addEventListener("drop",e=>{e.preventDefault();d.classList.remove("over");choose(b.id,d)});
+    d.addEventListener("click",()=>{ if(!answered) choose(b.id,d); });
+    bins.appendChild(d);
+  });
+  const fb=$("fb"); fb.className="feedback"; fb.textContent="";
+  $("nextBtn").disabled=true; $("nextBtn").textContent = idx===deck.length-1 ? "See results ▶" : "Next ▶";
+}
+const card=$("card");
+card.addEventListener("dragstart",e=>{card.classList.add("dragging");e.dataTransfer.setData("text","x")});
+card.addEventListener("dragend",()=>card.classList.remove("dragging"));
+card.addEventListener("click",()=>{selectedCard=!selectedCard; card.style.borderColor=selectedCard?"#f39c12":"var(--blue)"; $("prompt").textContent = selectedCard? "Now tap the box where this variable belongs." : $("prompt").textContent;});
+
+function explain(v,sub){
+  const kindTxt = v.k==="QL" ? "It is <b>qualitative</b> because the value is a category or label" : "It is <b>quantitative</b> because the value is a number that is counted or measured";
+  const dcTxt = v.k==="QN" ? (v.d==="D" ? " and <b>discrete</b> because it is counted (separate values)" : " and <b>continuous</b> because it is measured (any value in a range)") : "";
+  const lvlTxt = `Level: <b>${v.l}</b> – ${LEVEL_WHY[v.l]}`;
+  if(sub==="qq") return kindTxt+".";
+  if(sub==="dc") return kindTxt+dcTxt+".";
+  if(sub==="full") return kindTxt+dcTxt+ (v.k==="QL"?` and <b>${v.l}</b> because ${LEVEL_WHY[v.l]}`:".");
+  return lvlTxt;
+}
+function choose(binId, el){
+  if(answered) return; answered=true;
+  const item=deck[idx]; const m=MODES[subMode]; const correct=m.answer(item.v);
+  const ok = binId===correct;
+  document.querySelectorAll(".bin").forEach(b=>{ if(b.dataset.id===correct) b.classList.add("right"); });
+  if(!ok) el.classList.add("wrong");
+  if(ok){ score+=10+Math.min(streak,5)*2; streak++; best=Math.max(best,streak);} else { streak=0; }
+  const fb=$("fb"); fb.className="feedback "+(ok?"ok":"bad");
+  const title=m.bins.find(b=>b.id===correct).title;
+  fb.innerHTML=(ok?"✅ <b>Correct!</b> ":"❌ <b>Not quite.</b> The answer is <b>"+title+"</b>. ")+explain(item.v,subMode);
+  log.push({t:item.v.t, correct:title, mine:m.bins.find(b=>b.id===binId).title, ok});
+  $("score").textContent=score; $("streak").textContent=streak; $("nextBtn").disabled=false;
+}
+function next(){ idx++; if(idx>=deck.length) return finish(); showCard(); }
+function finish(){
+  clearInterval(timer);
+  $("game").style.display="none"; $("results").style.display="block";
+  const right=log.filter(l=>l.ok).length, secs=Math.round((Date.now()-t0)/1000);
+  const pct=Math.round(right/log.length*100);
+  $("badge").textContent = pct===100?"🏆":pct>=80?"🥇":pct>=60?"🥈":"📘";
+  $("summary").innerHTML=`You sorted <b>${right} of ${log.length}</b> cards correctly (${pct}%) in <b>${secs} s</b>. Score <b>${score}</b>, best streak <b>${best}</b>.` + (pct<80?" Read the explanations below, then play again.":" Excellent – try the mixed challenge!");
+  const tb=$("review").querySelector("tbody"); tb.innerHTML="";
+  log.forEach(l=>{const tr=document.createElement("tr"); tr.innerHTML=`<td>${l.t}</td><td><span class="tag">${l.correct}</span></td><td style="color:${l.ok?'var(--ok)':'var(--bad)'}">${l.ok?'✔':'✘'} ${l.mine}</td>`; tb.appendChild(tr);});
+}
+function backToMenu(){ clearInterval(timer); $("game").style.display="none"; $("results").style.display="none"; $("menu").style.display="block"; }
+</script>
+</body>
+</html>
