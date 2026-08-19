@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QUA107 · Chapter 2 · Chart Detective</title>
+<style>
+  @font-face{font-family:'SaudiRiyal';src:url(data:font/woff2;base64,d09GMgABAAAAAALQAA0AAAAABmAAAAJ8AAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP0ZGVE0cBmAAgkIIBBEICoFkgV4LCgABNgIkAxAEIAWEEAcqG2sFII7RS88cU5STILSS4qFvjPZnd860iVlEzJpYwjMh8YiUTIsk9dBOfHC/9vZR7+OS2G6oe1PNYtZcG1UbGepdnMqJRTj3AJ5FY9IAWgKhiIR0DlyzXIEKVaimFaxBzV0T+RGsse4hpRCTEPDx7aMa4OvPoMk4KXhL5vMY1UB5WY7wil40PlkLgaKhBUABgAsPAvLRij/+VKpxllpFuEEAYBRBRcUgAvbQEhikbRSkFPizq/H1u30IEI2sryggfgshfVNFTx8rLSB2NQSQoBmJNXAYQDuWCaBkNk4Y6XTktbJn66O7M6vZ83ezSbxW6/iVzez5jTxCeJLW5XmBbCPHw3SOjRmM/aS3ybfKobiYoLQuJ4d9mS3vxTZN5kOO0ZFJEq+07kG3XgPntIZf9fzh+Y8wzef6vKPRKbX7JysP29JgDtzada0fVbRLsLJnT0/b//VdXZ13HKYlGNjVkqA6hFzTjS0WI8JbgyB4PZu6cdPM/a/ZqP4asvyY8r8A0KyAoI5rXKVmLVA/CQBA5nO2QD6HfC4bQZojgIIQOEAJoNMbBKCPPQJCizsIKJq8QEA15U2A1BKtAjToik0Q0KglbtAS2YJ1YCH0ioSi00OoTumE1OsfGgyH9ec06g1/fqpUa1GrRJFi9SixPBIUx3AO5KgctQoUq4Cvgap5kpe0nMqpLSiuAK6qVK9EvXIF8nG4+niyKc7nwCUFijQoVyjgGjQHOKaqK1XVaxUFhAZTYihXVDEjcnPOFDgFWBa7OYmiobaogHIlo64UAMna3FnBFYg9QUWuObXqlEDTKZbhakpMwBLNZEytZMmTwscLsHtoHQQAgDxlyT4H) format('woff2')}
+  :root{--blue:#008DC3;--blue-dark:#0075A3;--grey:#748995;--cream:#E3E0D2;--ink:#1d2731;--ok:#1f9d55;--bad:#d64545;--card:#ffffff}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--cream);color:var(--ink);line-height:1.4}
+  header{background:var(--blue);color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  header h1{margin:0;font-size:1.25rem;letter-spacing:.2px}
+  header .sub{font-size:.85rem;opacity:.9}
+  header a{color:inherit}
+  .sar{font-family:'SaudiRiyal',sans-serif;font-style:normal}
+  .wrap{max-width:1100px;margin:0 auto;padding:18px}
+  .hud{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+  .stat{background:var(--card);border-radius:12px;padding:10px 14px;min-width:120px;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+  .stat .lbl{font-size:.72rem;color:var(--grey);text-transform:uppercase;letter-spacing:.06em}
+  .stat .val{font-size:1.4rem;font-weight:700;color:var(--blue-dark)}
+  .panel{background:var(--card);border-radius:16px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.08);margin-bottom:16px}
+  .btn{background:var(--blue);color:#fff;border:0;border-radius:999px;padding:10px 20px;font-size:1rem;cursor:pointer;font-weight:600}
+  .btn:hover{background:var(--blue-dark)}
+  .btn.ghost{background:transparent;color:var(--blue-dark);border:2px solid var(--blue)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+  .mode{border:2px solid #e2e6ea;border-radius:14px;padding:16px;cursor:pointer;transition:.15s;background:#fff}
+  .mode:hover{border-color:var(--blue);transform:translateY(-2px)}
+  .mode h3{margin:0 0 6px;color:var(--blue-dark)}
+  .mode p{margin:0;font-size:.92rem;color:#445}
+  .hint{font-size:.9rem;color:var(--grey)}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+  .two{display:grid;grid-template-columns:minmax(240px,1fr) 1.4fr;gap:18px;align-items:start}
+  @media (max-width:760px){.two{grid-template-columns:1fr}}
+  table{border-collapse:collapse;width:100%;font-size:.95rem}
+  th,td{border-bottom:1px solid #e2e6ea;padding:7px 8px;text-align:left}
+  th{background:#eef5f8;color:var(--blue-dark)}
+  td.num,th.num{text-align:right}
+  .prompt{font-size:1.05rem;margin:0 0 10px}
+  svg.chart{width:100%;height:auto;background:#fafaf7;border-radius:12px;border:1px solid #e2e6ea}
+  .opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:12px}
+  .opts.imgs{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+  .opt{border:2px solid #e2e6ea;border-radius:12px;padding:10px 12px;cursor:pointer;background:#fff;font-size:1rem}
+  .opt:hover{border-color:var(--blue)}
+  .opt.right{border-color:var(--ok);background:#e9f7ee}
+  .opt.wrong{border-color:var(--bad);background:#fdecec}
+  .opt .lbl{font-weight:700;color:var(--blue-dark);margin-right:6px}
+  .feedback{margin-top:14px;padding:12px 14px;border-radius:12px;font-size:1rem;display:none}
+  .feedback.ok{display:block;background:#e9f7ee;border-left:6px solid var(--ok)}
+  .feedback.bad{display:block;background:#fdecec;border-left:6px solid var(--bad)}
+  .progress{height:10px;background:#e2e6ea;border-radius:99px;overflow:hidden;margin:10px 0}
+  .progress div{height:100%;background:var(--blue);width:0;transition:.3s}
+  .badge{font-size:2.2rem}
+  footer{text-align:center;color:var(--grey);font-size:.8rem;padding:14px}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>Chart Detective</h1><div class="sub">QUA 107 · Chapter 2 · Read charts, choose the right chart, spot the mistakes</div></div>
+  <div class="sub" style="text-align:right">King Saud University · College of Business Administration<br><a href="../../../index.html">QUA 107 course page</a> · <a href="../slides.html">Chapter 2 slides</a></div>
+</header>
+<div class="wrap">
+
+  <div id="menu" class="panel">
+    <h2 style="margin-top:0;color:var(--blue-dark)">Choose a round</h2>
+    <p class="hint">Ten cases per round, new random data every time. Choose an answer, get instant feedback and an explanation.</p>
+    <div class="modes">
+      <div class="mode" onclick="start('match')"><h3>Round 1 · Which chart is right?</h3><p>A frequency table and four charts: only one is drawn correctly. Plus: variable type, level, table name, mode. LO 2.1</p></div>
+      <div class="mode" onclick="start('read')"><h3>Round 2 · Read the chart</h3><p>Bar, pie, histogram, polygon, dot plot, cumulative polygon: read the mode, counts, percents, “less than”. LO 2.1–2.3</p></div>
+      <div class="mode" onclick="start('which')"><h3>Round 3 · Which display?</h3><p>A business question: which table or chart answers it best? LO 2.1–2.3</p></div>
+      <div class="mode" onclick="start('spot')"><h3>Round 4 · Spot the mistake</h3><p>Every chart has one error: gaps in a histogram, a falling cumulative line, a pie that is not 100%, a cut axis … LO 2.1–2.3</p></div>
+      <div class="mode" onclick="start('mix')"><h3>Challenge · Mixed 16 cases</h3><p>All four rounds mixed, one score.</p></div>
+    </div>
+  </div>
+
+  <div id="game" style="display:none">
+    <div class="hud">
+      <div class="stat"><div class="lbl">Round</div><div class="val" id="roundName">–</div></div>
+      <div class="stat"><div class="lbl">Case</div><div class="val" id="caseNo">0 / 0</div></div>
+      <div class="stat"><div class="lbl">Score</div><div class="val" id="score">0</div></div>
+      <div class="stat"><div class="lbl">Streak</div><div class="val" id="streak">0</div></div>
+    </div>
+    <div class="progress"><div id="bar"></div></div>
+    <div class="panel">
+      <p class="prompt" id="prompt"></p>
+      <div id="stage"></div>
+      <div id="opts" class="opts"></div>
+      <div class="feedback" id="fb"></div>
+      <div class="row" style="margin-top:14px">
+        <button class="btn ghost" onclick="backToMenu()">Menu</button>
+        <button class="btn" id="nextBtn" onclick="next()" disabled>Next ▶</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="results" class="panel" style="display:none">
+    <div class="row"><h2 style="margin:0;color:var(--blue-dark)">Round complete</h2><div class="badge" id="badge">🏅</div></div>
+    <p id="summary" style="font-size:1.1rem"></p>
+    <table id="review"><thead><tr><th>Case</th><th>Correct answer</th><th>Your answer</th></tr></thead><tbody></tbody></table>
+    <div class="row" style="margin-top:14px">
+      <button class="btn ghost" onclick="backToMenu()">Menu</button>
+      <button class="btn" onclick="start(currentMode)">Play again</button>
+    </div>
+  </div>
+</div>
+<footer>QUA 107 · Introduction to Business Statistics · Practice game (not graded).</footer>
+
+<script>
+const $=id=>document.getElementById(id);
+const RY='<span class="sar">ê</span>&#8239;';
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+const ri=(a,b)=>a+Math.floor(Math.random()*(b-a+1)); const pick=a=>a[ri(0,a.length-1)];
+const fmt=v=>Number(v).toLocaleString('en-US'); const pctS=x=>(x*100).toFixed(1)+'%';
+const NICE=[1,2,5,10,20,25,30,40,50,60,70,80,90,100,150,200,250,300,400,500,600,700,800,900,1000,2000,5000]; function niceUp(x){for(const n of NICE){if(n>=x)return n}return Math.ceil(x/5000)*5000}
+const INK="#0B5F86",BLUE="#008DC3",GREY="#748995",LIGHT="#B9C4CC";
+
+/* ---------------- banks ---------------- */
+const CAT_SCEN=[
+ {t:"type of product bought at a Jarir branch",unit:"customer",cats:["Laptops","Tablets","Books","Stationery","Phones"],ord:false},
+ {t:"drinks ordered at a café in Al Olaya",unit:"order",cats:["Latte","Cappuccino","Espresso","Saudi coffee","Tea"],ord:false},
+ {t:"type of account opened at a bank branch",unit:"account",cats:["Current","Savings","Investment"],ord:false},
+ {t:"mobile network used by KSU students",unit:"student",cats:["stc","Mobily","Zain","Lebara"],ord:false},
+ {t:"payment method at a Panda checkout",unit:"transaction",cats:["mada","Apple Pay","Cash","Credit card"],ord:false},
+ {t:"brand of air conditioner sold by an Extra store",unit:"unit",cats:["LG","Gree","Samsung","Zamil"],ord:false},
+ {t:"nationality of the guests of a hotel in AlUla",unit:"guest",cats:["Saudi","Egyptian","Indonesian","Pakistani","Other"],ord:false},
+ {t:"type of complaint received by a call centre",unit:"complaint",cats:["Billing","Network","Service","Other"],ord:false},
+ {t:"hotel star rating chosen by tourists",unit:"tourist",cats:["3 stars","4 stars","5 stars"],ord:true},
+ {t:"T-shirt size sold at a clothing outlet",unit:"T-shirt",cats:["Small","Medium","Large","X-Large"],ord:true},
+ {t:"customer rating of a delivery service",unit:"customer",cats:["Poor","Fair","Good","Excellent"],ord:true},
+ {t:"job level of the staff of a bank branch",unit:"employee",cats:["Junior","Senior","Manager","Director"],ord:true},
+];
+const NUM_SCEN=[
+ {t:"the profit (in riyals) on each unit sold by a retail store",unit:"unit",money:true,lo:0,w:200,k:8},
+ {t:"the delivery time (in minutes) of online orders",unit:"order",money:false,lo:10,w:10,k:7},
+ {t:"the daily sales (in riyals) of a coffee kiosk",unit:"day",money:true,lo:500,w:500,k:5},
+ {t:"the age of the employees of a logistics company",unit:"employee",money:false,lo:20,w:5,k:8},
+ {t:"the monthly rent (in riyals) of apartments in Dammam",unit:"apartment",money:true,lo:1000,w:1000,k:5},
+ {t:"the score of applicants on a skills test (out of 100)",unit:"applicant",money:false,lo:40,w:10,k:6},
+ {t:"the waiting time (in seconds) at a bank counter",unit:"customer",money:false,lo:0,w:50,k:6},
+ {t:"the electricity bill (in riyals) of villas in summer",unit:"villa",money:true,lo:400,w:400,k:7},
+];
+function catData(){const s=pick(CAT_SCEN); const cats=s.ord?s.cats.slice():shuffle(s.cats.slice()).slice(0,ri(3,s.cats.length)); const g=pick([5,10]); const f=cats.map(()=>ri(2,12)*g); return {s,cats,freqs:f,n:f.reduce((a,b)=>a+b,0)}}
+function numData(){const s=pick(NUM_SCEN); const k=s.k; const shape=shuffle([1,2,3,4,3,2,1,1]).slice(0,k); const f=shape.map(x=>x*ri(2,6)); const cls=[]; for(let j=0;j<k;j++)cls.push(`${fmt(s.lo+j*s.w)} up to ${fmt(s.lo+(j+1)*s.w)}`); const cum=[]; let c=0; f.forEach(v=>{c+=v;cum.push(c)}); return {s,k,w:s.w,start:s.lo,freqs:f,n:c,cls,cum}}
+function dotData(){const s=pick([["laptops sold per day at a Jarir branch","day",8,22],["complaints per day at a call centre","day",0,9],["goals scored per match","match",0,5],["cars serviced per day at a garage","day",6,16],["items in a shopping cart at Danube","cart",1,15],["coffees sold per hour at a kiosk","hour",10,22]]); const n=ri(14,22); const c=(s[2]+s[3])/2, sp=(s[3]-s[2])/3; const vals=[]; for(let i=0;i<n;i++){let v=Math.round(c+(Math.random()+Math.random()-1)*sp*1.6); vals.push(Math.max(s[2],Math.min(s[3],v)))} return {t:s[0],unit:s[1],vals}}
+
+/* ---------------- SVG drawing ---------------- */
+function axesSvg(W,H,L,R,T,B,ymax,ylabel){const ph=H-T-B; const y=v=>T+ph*(1-v/ymax); const step=niceUp(ymax/5); let g=''; for(let v=0;v<=ymax+1e-9;v+=step){g+=`<line x1="${L}" y1="${y(v)}" x2="${W-R}" y2="${y(v)}" stroke="#e2e6ea"/><text x="${L-6}" y="${y(v)+4}" font-size="11" text-anchor="end" fill="#748995">${fmt(v)}</text>`} g+=`<text x="${L}" y="12" font-size="11" fill="#748995">${ylabel}</text><line x1="${L}" y1="${y(0)}" x2="${W-R}" y2="${y(0)}" stroke="#1d2731" stroke-width="1.5"/>`; return {g,y}}
+function svgBar(cats,freqs,opt={}){const W=520,H=300,L=52,R=16,T=22,B=52; const ymax=opt.ymin!==undefined?Math.max(...freqs)*1.08:niceUp(Math.max(...freqs)*1.15); const ymin=opt.ymin||0; const ph=H-T-B; const y=v=>T+ph*(1-(v-ymin)/(ymax-ymin)); let g=''; const step=niceUp((ymax-ymin)/5); for(let v=ymin;v<=ymax;v+=step){g+=`<line x1="${L}" y1="${y(v)}" x2="${W-R}" y2="${y(v)}" stroke="#e2e6ea"/><text x="${L-6}" y="${y(v)+4}" font-size="11" text-anchor="end" fill="#748995">${fmt(Math.round(v))}</text>`}
+  const slot=(W-L-R)/cats.length, bw=opt.touch?slot:slot*.55; let bars=''; cats.forEach((c,i)=>{const x=L+slot*i+(slot-bw)/2; bars+=`<rect x="${x}" y="${y(freqs[i])}" width="${bw}" height="${Math.max(0,y(ymin)-y(freqs[i]))}" fill="${BLUE}" stroke="${opt.touch?'#fff':'none'}"/>${opt.vals?`<text x="${x+bw/2}" y="${y(freqs[i])-5}" font-size="11" text-anchor="middle" fill="${INK}" font-weight="bold">${freqs[i]}</text>`:''}<text x="${x+bw/2}" y="${H-B+16}" font-size="11" text-anchor="middle">${c}</text>`});
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}"><text x="${L}" y="12" font-size="11" fill="#748995">${opt.ylabel||'Frequency'}</text>${g}<line x1="${L}" y1="${y(ymin)}" x2="${W-R}" y2="${y(ymin)}" stroke="#1d2731" stroke-width="1.5"/>${bars}${opt.title?`<text x="${W/2}" y="${H-6}" font-size="11" text-anchor="middle" fill="#748995">${opt.title}</text>`:''}</svg>`}
+function svgPie(cats,freqs,opt={}){const W=520,H=300,cx=150,cy=150,r=110; const n=freqs.reduce((a,b)=>a+b,0); const cols=[BLUE,INK,GREY,LIGHT,"#5FB3D9"]; let a=-Math.PI/2,w='',leg=''; const shares=opt.shares||freqs.map(f=>f/n);
+  cats.forEach((c,i)=>{const p=shares[i]; const b=a+2*Math.PI*p; const x1=cx+r*Math.cos(a),y1=cy+r*Math.sin(a),x2=cx+r*Math.cos(b),y2=cy+r*Math.sin(b); w+=`<path d="M${cx},${cy} L${x1.toFixed(1)},${y1.toFixed(1)} A${r},${r} 0 ${p>.5?1:0},1 ${x2.toFixed(1)},${y2.toFixed(1)} Z" fill="${cols[i]}" stroke="#fff" stroke-width="2"/>`; const m=(a+b)/2; if(p>0.06)w+=`<text x="${cx+r*.62*Math.cos(m)}" y="${cy+r*.62*Math.sin(m)+4}" font-size="11" text-anchor="middle" fill="${i<3?'#fff':INK}" font-weight="bold">${(opt.labels?opt.labels[i]:(p*100).toFixed(1)+'%')}</text>`; leg+=`<rect x="300" y="${60+i*30}" width="14" height="14" fill="${cols[i]}"/><text x="322" y="${72+i*30}" font-size="12">${c}</text>`; a=b});
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}">${w}${leg}${opt.title?`<text x="${W/2}" y="${H-6}" font-size="11" text-anchor="middle" fill="#748995">${opt.title}</text>`:''}</svg>`}
+function svgHist(d,opt={}){const W=520,H=300,L=52,R=16,T=22,B=52; const ymax=niceUp(Math.max(...d.freqs)*1.2); const {g,y}=axesSvg(W,H,L,R,T,B,ymax,'Frequency'); const k=d.k; const x=v=>L+(W-L-R)*(v-d.start)/(k*d.w); let bars='',ticks=''; const gap=opt.gaps?6:0;
+  for(let j=0;j<k;j++){const x0=x(d.start+j*d.w)+gap,x1=x(d.start+(j+1)*d.w)-gap; bars+=`<rect x="${x0}" y="${y(d.freqs[j])}" width="${x1-x0}" height="${Math.max(0,y(0)-y(d.freqs[j]))}" fill="${BLUE}"/>`}
+  for(let j=0;j<=k;j++)ticks+=`<text x="${x(d.start+j*d.w)}" y="${H-B+16}" font-size="10" text-anchor="middle">${fmt(d.start+j*d.w)}</text>`;
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}">${g}${bars}${ticks}<text x="${W/2}" y="${H-6}" font-size="11" text-anchor="middle" fill="#748995">${opt.title||''}</text></svg>`}
+function svgPoly(d,opt={}){const W=520,H=300,L=52,R=16,T=22,B=52; const ymax=niceUp(Math.max(...d.freqs)*1.2); const {g,y}=axesSvg(W,H,L,R,T,B,ymax,'Frequency'); const k=d.k; const x=v=>L+(W-L-R)*(v-(d.start-d.w))/((k+2)*d.w); let pts='',line='',ticks='';
+  const xs=[]; for(let j=-1;j<=k;j++)xs.push(opt.upper?d.start+(j+1)*d.w:d.start+j*d.w+d.w/2); const ys=[0,...d.freqs,0];
+  xs.forEach((m,i)=>{line+=`${x(m)},${y(ys[i])} `; if(i>0&&i<xs.length-1){pts+=`<circle cx="${x(m)}" cy="${y(ys[i])}" r="4" fill="${INK}"/>`; ticks+=`<text x="${x(m)}" y="${H-B+16}" font-size="10" text-anchor="middle">${fmt(m)}</text>`}});
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}">${g}<polyline points="${line}" fill="none" stroke="${BLUE}" stroke-width="2.5"/>${pts}${ticks}<text x="${W/2}" y="${H-6}" font-size="11" text-anchor="middle" fill="#748995">${opt.title||''}</text></svg>`}
+function svgOgive(d,opt={}){const W=520,H=300,L=52,R=40,T=22,B=52; const ymax=niceUp(d.n*1.05); const {g,y}=axesSvg(W,H,L,R,T,B,ymax,'Cumulative frequency'); const k=d.k; const x=v=>L+(W-L-R)*(v-d.start)/(k*d.w); const cum=opt.cum||d.cum; let line=`${x(d.start)},${y(0)} `,pts='',ticks=`<text x="${x(d.start)}" y="${H-B+16}" font-size="10" text-anchor="middle">${fmt(d.start)}</text>`;
+  for(let j=0;j<k;j++){const ux=x(d.start+(j+1)*d.w); line+=`${ux},${y(cum[j])} `; pts+=`<circle cx="${ux}" cy="${y(cum[j])}" r="4" fill="${INK}"/>`; ticks+=`<text x="${ux}" y="${H-B+16}" font-size="10" text-anchor="middle">${fmt(d.start+(j+1)*d.w)}</text>`}
+  let pc=''; [0,25,50,75,100].forEach(p=>{pc+=`<text x="${W-R+5}" y="${y(d.n*p/100)+4}" font-size="10" fill="#748995">${p}%</text>`});
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}">${g}${pc}<polyline points="${line}" fill="none" stroke="${BLUE}" stroke-width="2.5"/>${pts}${ticks}<text x="${W/2}" y="${H-6}" font-size="11" text-anchor="middle" fill="#748995">${opt.title||'Upper class limits'}</text></svg>`}
+function svgDot(dd){const W=520,H=220,L=30,R=30,base=170; const vals=dd.vals; const lo=Math.min(...vals)-1,hi=Math.max(...vals)+1; const x=v=>L+(W-L-R)*(v-lo)/(hi-lo); const cnt={}; vals.forEach(v=>cnt[v]=(cnt[v]||0)+1); let out=`<line x1="${L}" y1="${base}" x2="${W-R}" y2="${base}" stroke="#1d2731" stroke-width="1.5"/>`;
+  for(let v=lo+1;v<hi;v++)out+=`<line x1="${x(v)}" y1="${base}" x2="${x(v)}" y2="${base+5}" stroke="#1d2731"/><text x="${x(v)}" y="${base+18}" font-size="11" text-anchor="middle">${v}</text>`;
+  Object.entries(cnt).forEach(([v,c])=>{for(let j=0;j<c;j++)out+=`<circle cx="${x(+v)}" cy="${base-10-j*16}" r="6" fill="${BLUE}"/>`});
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}"><text x="${L}" y="14" font-size="11" fill="#748995">${dd.t}</text>${out}</svg>`}
+function tableHtml(head,rows){return `<table><tr>${head.map((h,i)=>`<th class="${i?'num':''}">${h}</th>`).join('')}</tr>${rows.map(r=>`<tr>${r.map((c,i)=>`<td class="${i?'num':''}">${c}</td>`).join('')}</tr>`).join('')}</table>`}
+function catTable(d){return tableHtml(['Category',`Number of ${d.s.unit}s`],[...d.cats.map((c,i)=>[c,d.freqs[i]]),['<b>Total</b>',`<b>${d.n}</b>`]])}
+function distTable(d){return tableHtml(['Class','Frequency'],[...d.cls.map((c,i)=>[c,d.freqs[i]]),['<b>Total</b>',`<b>${d.n}</b>`]])}
+
+/* ---------------- case generators: each returns {prompt, stage, opts:[{html,ok}], why, label} ---------------- */
+function padWrongs(correct,wrongs){let w=[...new Set(wrongs)].filter(x=>x!==correct); const m=String(correct).match(/^([\d,]+(?:\.\d+)?)(%?)$/); let tries=0;
+  while(w.length<3&&m&&tries<30){tries++; const num=parseFloat(m[1].replace(/,/g,'')); const dec=(m[1].split('.')[1]||'').length; let c=num*pick([0.5,0.75,1.25,1.5,2])+pick([0,1,-1])*(dec?Math.pow(10,-dec):1); c=Math.max(0,c); const t=(m[1].includes(',')||c>=1000?c.toLocaleString('en-US',{minimumFractionDigits:dec,maximumFractionDigits:dec}):c.toFixed(dec))+m[2]; if(t!==correct&&!w.includes(t))w.push(t)}
+  while(w.length<3){const t=['None of these','Cannot be read from the chart','It cannot be determined'][w.length]; if(!w.includes(t))w.push(t)}
+  return w.slice(0,3)}
+function mk(prompt,stage,correct,wrongs,why,imgs){wrongs=imgs?wrongs:padWrongs(correct,wrongs); const opts=shuffle([{html:correct,ok:true},...wrongs.slice(0,3).map(w=>({html:w,ok:false}))]); return {prompt,stage,opts,why,imgs:!!imgs,correctText:correct}}
+
+function genMatch(){
+  const d=catData(); const r=ri(0,4);
+  if(r===0||r===1){ // pick the correct chart
+    const pieMode=r===1&&d.cats.length<=5; const draw=(f,extra)=>pieMode?svgPie(d.cats.slice(0,f.length),f,extra):svgBar(d.cats.slice(0,f.length),f);
+    const sw=d.freqs.slice(); [sw[0],sw[sw.length-1]]=[sw[sw.length-1],sw[0]]; const sc=d.freqs.slice(); sc[1]=Math.max(1,Math.round(sc[1]*.5)); const ms=d.freqs.slice(0,-1);
+    // ensure the three distractors really differ from the table and from each other
+    if(sw[0]===d.freqs[0]){sw[1]+=10;sw[0]-=10}
+    if(sc[1]===d.freqs[1]){sc[1]=Math.max(1,sc[1]-5)}
+    return mk(`The frequency table shows the <b>${d.s.t}</b> (${d.n} ${d.s.unit}s). <b>Which ${pieMode?'pie':'bar'} chart shows this table correctly?</b>`, catTable(d), draw(d.freqs), [draw(sw),draw(sc),draw(ms)], `Check every category against the table: one chart swaps two ${pieMode?'slices':'bars'}, one has a ${pieMode?'slice':'bar'} that is too small, one is missing a category.`, true);
+  }
+  if(r===2) return mk(`The table shows the <b>${d.s.t}</b>. <b>What type of variable is the “Category” column (the ${d.s.t})?</b>`, catTable(d), `Qualitative (categorical) · ${d.s.ord?'ordinal':'nominal'}`, [`Quantitative (numerical) · discrete`,`Qualitative (categorical) · ${d.s.ord?'nominal':'ordinal'}`,`Quantitative (numerical) · continuous`], d.s.ord?'The values are categories with a natural order → qualitative, ordinal.':'The values are names with no natural order → qualitative, nominal.');
+  if(r===3) return mk(`The table shows the <b>${d.s.t}</b>. <b>What is this table called, and which category is the mode?</b>`, catTable(d), `A frequency table · mode = ${d.cats[d.freqs.indexOf(Math.max(...d.freqs))]}`, [`A frequency distribution · mode = ${d.cats[d.freqs.indexOf(Math.max(...d.freqs))]}`,`A frequency table · mode = ${d.cats[d.freqs.indexOf(Math.min(...d.freqs))]}`,`A cumulative distribution · mode = ${d.cats[0]}`], 'Categories → frequency table (a frequency distribution has classes of numbers). The mode is the most frequent category.');
+  const i=ri(0,d.cats.length-1); const rf=d.freqs[i]/d.n;
+  return mk(`The table shows the <b>${d.s.t}</b>. <b>What is the relative frequency of “${d.cats[i]}”?</b>`, catTable(d), rf.toFixed(4), [(d.freqs[i]/d.cats.length/10).toFixed(4),(1-rf).toFixed(4),(d.freqs[i]/100).toFixed(4)], `${d.freqs[i]} ÷ ${d.n} = ${rf.toFixed(4)}: divide by the total, not by the number of categories.`);
+}
+function genRead(){
+  const r=ri(0,5);
+  if(r===0){const d=catData(); const top=d.freqs.indexOf(Math.max(...d.freqs)); const q=ri(0,1); if(q===0) return mk(`Bar chart of the <b>${d.s.t}</b>. <b>Which category is the mode?</b>`, svgBar(d.cats,d.freqs,{title:'Category',vals:false}), d.cats[top], d.cats.filter((c,i)=>i!==top), 'The mode is the category with the tallest bar.');
+    const i=ri(0,d.cats.length-1); return mk(`Bar chart of the <b>${d.s.t}</b>. <b>About how many ${d.s.unit}s are “${d.cats[i]}”?</b>`, svgBar(d.cats,d.freqs,{title:'Category',vals:false}), String(d.freqs[i]), [String(d.freqs[i]+20),String(Math.max(5,d.freqs[i]-20)),String(d.freqs[top]+10)], `Read the height of the “${d.cats[i]}” bar on the vertical axis: ${d.freqs[i]}.`)}
+  if(r===1){const d=catData(); const i=ri(0,d.cats.length-1); const p=d.freqs[i]/d.n; return mk(`Pie chart of the <b>${d.s.t}</b> for <b>${d.n} ${d.s.unit}s</b>. <b>About how many ${d.s.unit}s are “${d.cats[i]}”?</b>`, svgPie(d.cats,d.freqs,{title:'Share of the whole'}), String(d.freqs[i]), [String(Math.round(p*100)),String(d.n-d.freqs[i]),String(Math.round(d.freqs[i]*1.5)+5)], `${(p*100).toFixed(1)}% of ${d.n} ≈ ${d.freqs[i]}.`)}
+  if(r===2){const d=numData(); const j=ri(1,d.k-1); const below=d.cum[j-1]; const lim=d.start+j*d.w; const m=d.s.money?RY:''; const q=ri(0,1);
+    if(q===0) return mk(`Histogram of <b>${d.s.t}</b> (${d.n} ${d.s.unit}s). <b>How many ${d.s.unit}s have a value less than ${m}${fmt(lim)}?</b>`, svgHist(d,{title:'Class limits'}), String(below), [String(d.n-below),String(d.freqs[j-1]),String(d.cum[j])], 'Add the heights of all bars to the left of that limit.');
+    const top=d.freqs.indexOf(Math.max(...d.freqs)); return mk(`Histogram of <b>${d.s.t}</b>. <b>Which class is the modal class?</b>`, svgHist(d,{title:'Class limits'}), d.cls[top], d.cls.filter((c,i)=>i!==top), 'The tallest bar.')}
+  if(r===3){const d=numData(); const j=ri(0,d.k-1); const mid=d.start+j*d.w+d.w/2; return mk(`Frequency polygon of <b>${d.s.t}</b>. <b>What is the frequency at the midpoint ${fmt(mid)}?</b>`, svgPoly(d,{title:'Class midpoints'}), String(d.freqs[j]), [String(d.freqs[j]+3),String(Math.max(0,d.freqs[j]-3)),String(d.cum[j])], `Read the height of the point above ${fmt(mid)}.`)}
+  if(r===4){const dd=dotData(); const cnt={}; dd.vals.forEach(v=>cnt[v]=(cnt[v]||0)+1); const mode=+Object.keys(cnt).reduce((a,b)=>cnt[a]>=cnt[b]?a:b); const q=ri(0,2); const mn=Math.min(...dd.vals),mx=Math.max(...dd.vals);
+    if(q===0) return mk(`Dot plot: <b>${dd.t}</b>. <b>Which value is the mode?</b>`, svgDot(dd), String(mode), [String(mn),String(mx),String(mode+1===mx+1?mode-1:mode+1)], 'The tallest stack of dots.');
+    if(q===1) return mk(`Dot plot: <b>${dd.t}</b>. <b>How many ${dd.unit}s are in the data set?</b>`, svgDot(dd), String(dd.vals.length), [String(dd.vals.length+2),String(dd.vals.length-2),String(mx)], 'Count all the dots: one dot per '+dd.unit+'.');
+    return mk(`Dot plot: <b>${dd.t}</b>. <b>What is the range (largest − smallest)?</b>`, svgDot(dd), String(mx-mn), [String(mx),String(mx-mn+1),String(mn)], `${mx} − ${mn} = ${mx-mn}.`)}
+  const d=numData(); const j=ri(1,d.k-1); const lim=d.start+j*d.w; const m=d.s.money?RY:''; const q=ri(0,1);
+  if(q===0) return mk(`Cumulative frequency polygon of <b>${d.s.t}</b>. <b>How many ${d.s.unit}s have a value less than ${m}${fmt(lim)}?</b>`, svgOgive(d), String(d.cum[j-1]), [String(d.n-d.cum[j-1]),String(d.freqs[j-1]),String(d.cum[j])], 'Go up from the limit to the line, then left to the axis.');
+  return mk(`Cumulative frequency polygon of <b>${d.s.t}</b> (${d.n} ${d.s.unit}s). <b>What percent have a value of ${m}${fmt(lim)} or more?</b>`, svgOgive(d), pctS(1-d.cum[j-1]/d.n), [pctS(d.cum[j-1]/d.n),pctS(d.freqs[j]/d.n),pctS(d.cum[j]/d.n)], `100% − percent below ${fmt(lim)} (${pctS(d.cum[j-1]/d.n)}).`);
+}
+const WHICH=[
+ ["show which of 5 account types is the most common","Bar chart"],["show each account type's share of all accounts","Pie chart"],
+ ["show the shape of the distribution of 500 exam scores","Histogram"],["compare the delivery times of two courier companies on ONE chart","Two frequency polygons"],
+ ["show the exact ages of 18 employees in a small office","Dot plot"],["answer “how many customers waited less than 5, 10, 15 minutes?”","Cumulative frequency polygon"],
+ ["show the market share of four supermarket chains","Pie chart"],["compare the number of complaints of 15 branches","Bar chart"],
+ ["show the percent of employees below each salary level","Cumulative frequency polygon"],["show the profits of 160 units grouped in 8 classes","Histogram"],
+ ["compare last year's and this year's profit distributions","Two frequency polygons"],["show the daily sales of a kiosk for 20 days, every value visible","Dot plot"],
+ ["show exam grades A, B, C, D, F in their natural order","Bar chart"],["show how the monthly budget is split between rent, food, transport, other","Pie chart"],
+];
+const WOPTS=["Bar chart","Pie chart","Histogram","Two frequency polygons","Dot plot","Cumulative frequency polygon"];
+const WWHY={"Bar chart":"categories compared by height (gaps between bars).","Pie chart":"parts of a whole, few categories.","Histogram":"numerical data grouped into classes; shows the shape.","Two frequency polygons":"lines can share one chart; bars would overlap.","Dot plot":"small data set, every value visible.","Cumulative frequency polygon":"'less than' / percent-below questions."};
+function genWhich(){const w=pick(WHICH); return mk(`A manager wants to <b>${w[0]}</b>. <b>Which display is best?</b>`, '', w[1], shuffle(WOPTS.filter(o=>o!==w[1])), `${w[1]}: ${WWHY[w[1]]}`)}
+function genSpot(){
+  const r=ri(0,6);
+  if(r===0){const d=numData(); return mk(`Histogram of <b>${d.s.t}</b>. <b>What is wrong with this chart?</b>`, svgHist(d,{gaps:true,title:'Class limits'}), 'The bars have gaps: histogram bars must touch (numerical classes)', ['The classes are in the wrong order','The vertical axis should show percentages','Nothing: the chart is correct'], 'Numerical classes cover a continuous number line, so the bars touch. Gaps are for bar charts of categories.')}
+  if(r===1){const d=numData(); const bad=d.cum.slice(); const j=ri(1,d.k-2); bad[j]=Math.max(0,bad[j-1]-ri(2,6)); return mk(`Cumulative frequency polygon of <b>${d.s.t}</b>. <b>What is wrong?</b>`, svgOgive(d,{cum:bad}), 'The line goes down: a running total can never decrease', ['The first point should be at n','The points should be at the midpoints','Nothing: the chart is correct'], 'Cumulative frequency is a running total: it rises or stays flat, and ends at n.')}
+  if(r===2){const d=catData(); const shares=d.freqs.map(f=>f/d.n); shares[0]+=0.15; shares[1]-=0.05; const labels=shares.map(s=>(s*100).toFixed(1)+'%'); return mk(`Pie chart of the <b>${d.s.t}</b>. The percents written on the slices add up to <b>${(shares.reduce((a,b)=>a+b,0)*100).toFixed(1)}%</b>. <b>What is wrong?</b>`, svgPie(d.cats,d.freqs,{shares:shares.map(s=>s/shares.reduce((a,b)=>a+b,0)),labels}), 'The percents do not add up to 100%: the slices must be relative frequencies of the whole', ['A pie chart should have gaps between the slices','The largest slice should always be first','Nothing: the chart is correct'], 'The whole circle is 100%; every slice is frequency ÷ total.')}
+  if(r===3){const d=numData(); return mk(`This chart is meant to be the frequency polygon of <b>${d.s.t}</b>. <b>What is wrong?</b>`, svgPoly(d,{upper:true,title:'Points plotted at the upper limits'}), 'The points are plotted at the upper limits: a frequency polygon uses the class midpoints', ['The polygon should not touch the axis','The vertical axis should be cumulative','Nothing: the chart is correct'], 'Frequency polygon → midpoints. Cumulative polygon → upper limits.')}
+  if(r===4){const s=CAT_SCEN.filter(x=>x.ord); const sc=pick(s); const cats=shuffle(sc.cats.slice()); const f=cats.map(()=>ri(3,12)*5); return mk(`Bar chart of the <b>${sc.t}</b> (an ordinal variable). <b>What is wrong?</b>`, svgBar(cats,f,{title:'Category'}), 'The categories are not in their natural order: ordinal categories should keep their order', ['The bars should touch','A pie chart is the only correct chart here','Nothing: the chart is correct'], `Ordinal categories (${sc.cats.join(' < ')}) keep their natural order; only nominal categories can be sorted freely.`)}
+  if(r===5){const cats=["Branch A","Branch B"]; const f=[ri(90,99),ri(100,105)]; return mk(`Profit of two branches (in thousands of riyals). Branch B looks <b>much</b> bigger. <b>What is wrong?</b>`, svgBar(cats,f,{ymin:f[0]-3,vals:true,title:'Vertical axis starts at '+(f[0]-3)+', not at 0'}), 'The vertical axis does not start at 0: the difference is exaggerated (misleading)', ['Bar B is drawn with the wrong colour','The bars should be replaced by a pie chart','Nothing: the chart is correct'], 'A bar chart or histogram must start its frequency axis at 0; a cut axis exaggerates small differences (Chapter 1 ethics).')}
+  const d=numData(); const cls=d.cls.slice(); cls[1]=`${fmt(d.start+d.w)} up to ${fmt(d.start+2*d.w+d.w/2)}`; cls[2]=`${fmt(d.start+2*d.w+d.w/2)} up to ${fmt(d.start+3*d.w)}`; return mk(`A frequency distribution of <b>${d.s.t}</b> uses these classes: <b>${cls.slice(0,4).join(' · ')} …</b> <b>What is wrong?</b>`, '', 'The classes do not all have the same width', ['The classes overlap','The classes are not collectively exhaustive','Nothing: the classes are correct'], 'All classes of a frequency distribution should have the same width.');
+}
+
+/* ---------------- game flow ---------------- */
+const GEN={match:genMatch,read:genRead,which:genWhich,spot:genSpot};
+const NAMES={match:"Which chart is right?",read:"Read the chart",which:"Which display?",spot:"Spot the mistake",mix:"Mixed challenge"};
+let currentMode=null, deck=[], idx=0, score=0, streak=0, best=0, log=[], answered=false;
+function start(mode){currentMode=mode; score=0; streak=0; best=0; idx=0; log=[];
+  const kinds= mode==='mix'? shuffle(['match','match','match','match','read','read','read','read','which','which','which','which','spot','spot','spot','spot']) : Array(10).fill(mode);
+  deck=kinds.map(k=>{const c=GEN[k](); c.kind=k; return c});
+  $('menu').style.display='none';$('results').style.display='none';$('game').style.display='block';$('roundName').textContent=NAMES[mode]; show()}
+function backToMenu(){$('game').style.display='none';$('results').style.display='none';$('menu').style.display='block'}
+function show(){const c=deck[idx]; answered=false; $('fb').className='feedback'; $('nextBtn').disabled=true; $('nextBtn').textContent='Next ▶';
+  $('caseNo').textContent=(idx+1)+' / '+deck.length; $('score').textContent=score; $('streak').textContent=streak; $('bar').style.width=(idx/deck.length*100)+'%';
+  $('prompt').innerHTML=c.prompt; $('stage').innerHTML=c.stage?`<div style="max-width:560px">${c.stage}</div>`:'';
+  const o=$('opts'); o.className='opts'+(c.imgs?' imgs':''); o.innerHTML=c.opts.map((op,i)=>`<div class="opt" onclick="answer(${i})"><span class="lbl">${'ABCD'[i]}</span>${op.html}</div>`).join('')}
+function answer(i){if(answered)return; answered=true; const c=deck[idx]; const ok=c.opts[i].ok; const els=[...document.querySelectorAll('#opts .opt')];
+  els[i].classList.add(ok?'right':'wrong'); els[c.opts.findIndex(o=>o.ok)].classList.add('right');
+  if(ok){score+=1+(streak>=3?1:0); streak++; best=Math.max(best,streak); $('fb').className='feedback ok'; $('fb').innerHTML='✅ <b>Correct.</b> '+c.why+(streak>=3?' <em>Streak bonus +1!</em>':'')} else {streak=0; $('fb').className='feedback bad'; $('fb').innerHTML='❌ <b>Not quite.</b> '+c.why}
+  log.push({c,ok,mine:i}); $('score').textContent=score; $('streak').textContent=streak; $('nextBtn').disabled=false; $('nextBtn').textContent= idx+1>=deck.length?'Finish ▶':'Next ▶'}
+function next(){idx++; if(idx>=deck.length){finish();return} show()}
+function finish(){$('game').style.display='none';$('results').style.display='block'; const n=deck.length, right=log.filter(l=>l.ok).length; const p=right/n;
+  $('badge').textContent=p>=.9?'🏆':p>=.7?'🥈':p>=.5?'🥉':'📘';
+  $('summary').innerHTML=`You solved <b>${right}</b> of ${n} cases (score ${score}, best streak ${best}). `+(p>=.9?'Excellent: a real chart detective.':p>=.7?'Good. Look at the cases you missed below.':'Keep practising: table first, then chart; “up to” excludes the upper limit; cumulative never goes down.');
+  const tb=$('review').querySelector('tbody'); tb.innerHTML=log.map((l,i)=>`<tr><td>${i+1}. ${l.c.prompt.replace(/<[^>]+>/g,'').slice(0,90)}…</td><td>${l.c.imgs?'chart '+'ABCD'[l.c.opts.findIndex(o=>o.ok)]:l.c.correctText}</td><td style="color:${l.ok?'#1f9d55':'#d64545'}">${l.ok?'✔':'✘'} ${l.c.imgs?'chart '+'ABCD'[l.mine]:l.c.opts[l.mine].html.replace(/<[^>]+>/g,'')}</td></tr>`).join('')}
+</script>
+</body>
+</html>

@@ -228,7 +228,13 @@ a.row.link .go{font-family:'Newsreader';font-size:40px;color:var(--blue);padding
 .edit-toggle.show,.edit-toggle.active{opacity:1;pointer-events:auto}
 .edit-toggle.active{background:var(--blue)}
 @media print{
-  @page{size:1920px 1080px;margin:0}
+  /* Page = a 16:9 widescreen slide (13.333in x 7.5in). If the printer forces another paper size (Microsoft Print to PDF, iPad),
+     each slide is still zoomed to the page width, so nothing is cut; there is only white space below the slide. */
+  @page{size:13.333in 7.5in;margin:0}
+  html,body{width:100vw!important;height:auto!important;overflow:hidden!important}
+  .deck-viewport,.deck-stage{width:100vw!important;height:auto!important;overflow:hidden!important;transform:none!important;position:static!important}
+  .slide{width:1920px!important;height:1080px!important;zoom:calc(100vw / 1920px);margin:0!important;page-break-after:always;break-after:page;position:relative!important;display:block!important;opacity:1!important;overflow:hidden}
+  .slide:last-child{break-after:auto;page-break-after:auto}
   .slide .reveal,.slide .rv,.slide .pp,.slide .ln1-dot,.slide .ln2-dot{opacity:1!important;transform:none!important}
   .slide .ln1,.slide .ln2{stroke-dashoffset:0!important}
   .reveal-btn,.edit-hotzone,.edit-toggle,#menu{display:none!important}
@@ -424,7 +430,9 @@ class SlidePresentation{
   wake(){const c=document.getElementById('ctrl');c.classList.remove('hide');clearTimeout(this.ht);this.ht=setTimeout(()=>c.classList.add('hide'),3500)}
   full(){const el=document.documentElement;if(document.fullscreenElement){document.exitFullscreen()}else{(el.requestFullscreen||el.webkitRequestFullscreen).call(el)}}
   toggleMenu(){document.getElementById('menu').classList.toggle('open')}
-  setupControls(){document.getElementById('bPrev').onclick=()=>this.prev();document.getElementById('bNext').onclick=()=>this.next();document.getElementById('bMenu').onclick=()=>this.toggleMenu();document.getElementById('bFull').onclick=()=>this.full();document.getElementById('bPdf').onclick=()=>window.print();
+  /* PDF = the browser's print dialog (one slide per page; the print CSS fits each slide to the page width on any paper) */
+  pdf(){window.print()}
+  setupControls(){document.getElementById('bPrev').onclick=()=>this.prev();document.getElementById('bNext').onclick=()=>this.next();document.getElementById('bMenu').onclick=()=>this.toggleMenu();document.getElementById('bFull').onclick=()=>this.full();document.getElementById('bPdf').onclick=()=>this.pdf();
     document.querySelectorAll('#menu a[data-go]').forEach(a=>a.onclick=()=>{this.show(+a.dataset.go);this.toggleMenu()});document.getElementById('menu').onclick=e=>{if(e.target.id==='menu')this.toggleMenu()};this.wake()}
   /* === INLINE EDITING: hover top-left corner or press E; click text to edit; Ctrl+S downloads the edited HTML === */
   setupEditor(){

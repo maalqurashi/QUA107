@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QUA107 · Chapter 2 · Chart Builder</title>
+<style>
+  @font-face{font-family:'SaudiRiyal';src:url(data:font/woff2;base64,d09GMgABAAAAAALQAA0AAAAABmAAAAJ8AAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP0ZGVE0cBmAAgkIIBBEICoFkgV4LCgABNgIkAxAEIAWEEAcqG2sFII7RS88cU5STILSS4qFvjPZnd860iVlEzJpYwjMh8YiUTIsk9dBOfHC/9vZR7+OS2G6oe1PNYtZcG1UbGepdnMqJRTj3AJ5FY9IAWgKhiIR0DlyzXIEKVaimFaxBzV0T+RGsse4hpRCTEPDx7aMa4OvPoMk4KXhL5vMY1UB5WY7wil40PlkLgaKhBUABgAsPAvLRij/+VKpxllpFuEEAYBRBRcUgAvbQEhikbRSkFPizq/H1u30IEI2sryggfgshfVNFTx8rLSB2NQSQoBmJNXAYQDuWCaBkNk4Y6XTktbJn66O7M6vZ83ezSbxW6/iVzez5jTxCeJLW5XmBbCPHw3SOjRmM/aS3ybfKobiYoLQuJ4d9mS3vxTZN5kOO0ZFJEq+07kG3XgPntIZf9fzh+Y8wzef6vKPRKbX7JysP29JgDtzada0fVbRLsLJnT0/b//VdXZ13HKYlGNjVkqA6hFzTjS0WI8JbgyB4PZu6cdPM/a/ZqP4asvyY8r8A0KyAoI5rXKVmLVA/CQBA5nO2QD6HfC4bQZojgIIQOEAJoNMbBKCPPQJCizsIKJq8QEA15U2A1BKtAjToik0Q0KglbtAS2YJ1YCH0ioSi00OoTumE1OsfGgyH9ec06g1/fqpUa1GrRJFi9SixPBIUx3AO5KgctQoUq4Cvgap5kpe0nMqpLSiuAK6qVK9EvXIF8nG4+niyKc7nwCUFijQoVyjgGjQHOKaqK1XVaxUFhAZTYihXVDEjcnPOFDgFWBa7OYmiobaogHIlo64UAMna3FnBFYg9QUWuObXqlEDTKZbhakpMwBLNZEytZMmTwscLsHtoHQQAgDxlyT4H) format('woff2')}
+  :root{--blue:#008DC3;--blue-dark:#0075A3;--grey:#748995;--cream:#E3E0D2;--ink:#1d2731;--ok:#1f9d55;--bad:#d64545;--card:#ffffff}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--cream);color:var(--ink);line-height:1.4}
+  header{background:var(--blue);color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  header h1{margin:0;font-size:1.25rem;letter-spacing:.2px}
+  header .sub{font-size:.85rem;opacity:.9}
+  header a{color:inherit}
+  .sar{font-family:'SaudiRiyal',sans-serif;font-style:normal}
+  .wrap{max-width:1100px;margin:0 auto;padding:18px}
+  .hud{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+  .stat{background:var(--card);border-radius:12px;padding:10px 14px;min-width:120px;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+  .stat .lbl{font-size:.72rem;color:var(--grey);text-transform:uppercase;letter-spacing:.06em}
+  .stat .val{font-size:1.4rem;font-weight:700;color:var(--blue-dark)}
+  .panel{background:var(--card);border-radius:16px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.08);margin-bottom:16px}
+  .btn{background:var(--blue);color:#fff;border:0;border-radius:999px;padding:10px 20px;font-size:1rem;cursor:pointer;font-weight:600}
+  .btn:hover{background:var(--blue-dark)}
+  .btn.ghost{background:transparent;color:var(--blue-dark);border:2px solid var(--blue)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+  .mode{border:2px solid #e2e6ea;border-radius:14px;padding:16px;cursor:pointer;transition:.15s;background:#fff}
+  .mode:hover{border-color:var(--blue);transform:translateY(-2px)}
+  .mode h3{margin:0 0 6px;color:var(--blue-dark)}
+  .mode p{margin:0;font-size:.92rem;color:#445}
+  .hint{font-size:.9rem;color:var(--grey)}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+  .two{display:grid;grid-template-columns:minmax(260px,380px) 1fr;gap:18px;align-items:start}
+  @media (max-width:760px){.two{grid-template-columns:1fr}}
+  table{border-collapse:collapse;width:100%;font-size:.95rem}
+  th,td{border-bottom:1px solid #e2e6ea;padding:7px 8px;text-align:left;vertical-align:middle}
+  th{background:#eef5f8;color:var(--blue-dark)}
+  td.num,th.num{text-align:right}
+  td input{width:88px;padding:5px 6px;border:1.5px solid #cbd5dc;border-radius:8px;font-size:.95rem;text-align:right}
+  td input.ok{border-color:var(--ok);background:#e9f7ee}
+  td input.bad{border-color:var(--bad);background:#fdecec}
+  .scenario{font-size:1.02rem;margin:0 0 10px}
+  svg.chart{width:100%;height:auto;background:#fafaf7;border-radius:12px;border:1px solid #e2e6ea;touch-action:none;user-select:none}
+  .feedback{margin-top:12px;padding:12px 14px;border-radius:12px;font-size:1rem;display:none}
+  .feedback.ok{display:block;background:#e9f7ee;border-left:6px solid var(--ok)}
+  .feedback.bad{display:block;background:#fdecec;border-left:6px solid var(--bad)}
+  .feedback.info{display:block;background:#eef5f8;border-left:6px solid var(--blue)}
+  .qs{margin-top:16px}
+  .q{border-top:1px solid #e2e6ea;padding:12px 0}
+  .q .qt{font-weight:600;margin-bottom:8px}
+  .opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px}
+  .opt{border:2px solid #e2e6ea;border-radius:10px;padding:8px 12px;cursor:pointer;background:#fff}
+  .opt:hover{border-color:var(--blue)}
+  .opt.sel{border-color:var(--blue);background:#eaf6fb}
+  .opt.right{border-color:var(--ok);background:#e9f7ee}
+  .opt.wrong{border-color:var(--bad);background:#fdecec}
+  .qfb{font-size:.92rem;margin-top:6px;color:#334}
+  .progress{height:10px;background:#e2e6ea;border-radius:99px;overflow:hidden;margin:10px 0}
+  .progress div{height:100%;background:var(--blue);width:0;transition:.3s}
+  .tag{display:inline-block;padding:2px 8px;border-radius:99px;font-size:.78rem;background:#eef5f8;color:var(--blue-dark);margin-right:4px}
+  .badge{font-size:2.2rem}
+  footer{text-align:center;color:var(--grey);font-size:.8rem;padding:14px}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>Chart Builder</h1><div class="sub">QUA 107 · Chapter 2 · Build the table, then draw the chart yourself</div></div>
+  <div class="sub" style="text-align:right">King Saud University · College of Business Administration<br><a href="../../../index.html">QUA 107 course page</a> · <a href="../slides.html">Chapter 2 slides</a></div>
+</header>
+<div class="wrap">
+
+  <!-- MENU -->
+  <div id="menu" class="panel">
+    <h2 style="margin-top:0;color:var(--blue-dark)">Choose a round</h2>
+    <p class="hint">Every round gives you a new random Saudi business scenario. Fill the table, drag the bars or points to the right heights, press <b>Check my work</b>, then answer the reading questions. Instant feedback, not graded.</p>
+    <div class="modes">
+      <div class="mode" onclick="start('bar')"><h3>Round 1 · Bar chart</h3><p>Fill the relative frequency and percent columns, then drag each bar to its frequency. LO 2.1</p></div>
+      <div class="mode" onclick="start('hist')"><h3>Round 2 · Histogram</h3><p>Choose k and the class width for a raw data set, then drag the histogram bars. LO 2.2</p></div>
+      <div class="mode" onclick="start('poly')"><h3>Round 3 · Frequency polygon</h3><p>Fill the midpoints, then place each point of the polygon. LO 2.3</p></div>
+      <div class="mode" onclick="start('ogive')"><h3>Round 4 · Cumulative polygon</h3><p>Fill the cumulative column, then place the points at the upper limits. LO 2.3</p></div>
+      <div class="mode" onclick="start('mix')"><h3>Challenge · All four</h3><p>One of each, in order, with one combined score.</p></div>
+    </div>
+    <div style="margin-top:14px" class="hint"><strong>Rules used in this course:</strong> “a up to b” includes a but not b · relative frequency = frequency ÷ total · round the class width up · histogram bars touch · the polygon uses midpoints, the cumulative polygon uses upper limits.</div>
+  </div>
+
+  <!-- GAME -->
+  <div id="game" style="display:none">
+    <div class="hud">
+      <div class="stat"><div class="lbl">Round</div><div class="val" id="roundName">–</div></div>
+      <div class="stat"><div class="lbl">Task</div><div class="val" id="taskNo">1 / 4</div></div>
+      <div class="stat"><div class="lbl">Score</div><div class="val" id="score">0</div></div>
+      <div class="stat"><div class="lbl">Streak</div><div class="val" id="streak">0</div></div>
+    </div>
+    <div class="progress"><div id="bar"></div></div>
+    <div class="panel">
+      <p class="scenario" id="scenario"></p>
+      <div id="stepA"></div>
+      <div class="two">
+        <div id="tableBox"></div>
+        <div>
+          <div class="hint" id="chartHint"></div>
+          <div id="chartBox"></div>
+          <div class="row" style="margin-top:10px">
+            <button class="btn" id="checkBtn" onclick="checkWork()">Check my work</button>
+            <button class="btn ghost" onclick="resetChart()">Reset chart</button>
+          </div>
+        </div>
+      </div>
+      <div class="feedback" id="fb"></div>
+      <div class="qs" id="qs"></div>
+      <div class="row" style="margin-top:14px">
+        <button class="btn ghost" onclick="backToMenu()">Menu</button>
+        <button class="btn" id="nextBtn" onclick="nextTask()" disabled>Next ▶</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="results" class="panel" style="display:none">
+    <div class="row"><h2 style="margin:0;color:var(--blue-dark)">Round complete</h2><div class="badge" id="badge">🏅</div></div>
+    <p id="summary" style="font-size:1.1rem"></p>
+    <div class="row" style="margin-top:14px">
+      <button class="btn ghost" onclick="backToMenu()">Menu</button>
+      <button class="btn" onclick="start(currentMode)">Play again</button>
+    </div>
+  </div>
+</div>
+<footer>QUA 107 · Introduction to Business Statistics · Practice game (not graded).</footer>
+
+<script>
+const $=id=>document.getElementById(id);
+const RY='<span class="sar">ê</span>&#8239;';
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+const ri=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const fmt=v=>Number(v).toLocaleString('en-US');
+
+/* ---------------- scenario banks (Saudi context) ---------------- */
+const CAT_SCEN=[
+ {t:"A Jarir branch recorded the <b>type of product</b> bought by customers in one afternoon.",unit:"customer",cats:["Laptops","Tablets","Books","Stationery","Phones"]},
+ {t:"A café in Al Olaya counted the <b>drinks ordered</b> in one hour.",unit:"order",cats:["Latte","Cappuccino","Espresso","Saudi coffee","Tea"]},
+ {t:"A bank branch in Dammam recorded the <b>type of account</b> opened this month.",unit:"account",cats:["Current","Savings","Investment"]},
+ {t:"A survey asked KSU students which <b>mobile network</b> they use.",unit:"student",cats:["stc","Mobily","Zain","Lebara"]},
+ {t:"A Panda checkout recorded the <b>payment method</b> of each transaction.",unit:"transaction",cats:["mada","Apple Pay","Cash","Credit card"]},
+ {t:"HungerStation recorded the <b>type of restaurant</b> for the orders of one evening.",unit:"order",cats:["Fast food","Arabic","Asian","Desserts","Coffee"]},
+ {t:"An Extra store recorded the <b>brand of air conditioner</b> sold last month.",unit:"unit",cats:["LG","Gree","Samsung","Zamil"]},
+ {t:"A hotel in AlUla recorded the <b>nationality</b> of its guests last week.",unit:"guest",cats:["Saudi","Egyptian","Indonesian","Pakistani","Other"]},
+ {t:"A call centre classified the <b>type of complaint</b> received today.",unit:"complaint",cats:["Billing","Network","Service","Other"]},
+ {t:"A parking lot at KSU recorded the <b>car brand</b> of 100 cars.",unit:"car",cats:["Toyota","Hyundai","Ford","GAC","Nissan"]},
+];
+const NUM_SCEN=[
+ {t:"the <b>profit</b> (in riyals) on each unit sold by a retail store",unit:"unit",money:true,lo:40,hi:1500,scale:1},
+ {t:"the <b>delivery time</b> (in minutes) of online orders",unit:"order",money:false,lo:8,hi:80,scale:1},
+ {t:"the <b>daily sales</b> (in riyals) of a coffee kiosk",unit:"day",money:true,lo:500,hi:2600,scale:1},
+ {t:"the <b>age</b> of the employees of a logistics company",unit:"employee",money:false,lo:20,hi:62,scale:1},
+ {t:"the <b>monthly rent</b> (in riyals) of apartments in Dammam",unit:"apartment",money:true,lo:1000,hi:5200,scale:1},
+ {t:"the <b>score</b> of applicants on a skills test (out of 100)",unit:"applicant",money:false,lo:35,hi:99,scale:1},
+ {t:"the <b>waiting time</b> (in seconds) at a bank counter",unit:"customer",money:false,lo:10,hi:300,scale:1},
+ {t:"the <b>electricity bill</b> (in riyals) of villas in summer",unit:"villa",money:true,lo:400,hi:3200,scale:1},
+ {t:"the <b>number of calls</b> answered per day by an agent",unit:"day",money:false,lo:30,hi:120,scale:1},
+ {t:"the <b>weight</b> (in kg) of parcels shipped by a courier",unit:"parcel",money:false,lo:1,hi:25,scale:1},
+];
+const NICE=[1,2,5,10,20,25,50,100,200,250,500,1000];
+function niceUp(x){for(const n of NICE){if(n>=x)return n}return Math.ceil(x/1000)*1000}
+function kRule(n){let k=1;while(Math.pow(2,k)<=n)k++;return k}
+
+/* ---------------- state ---------------- */
+let currentMode=null, tasks=[], ti=0, score=0, streak=0, T=null, drag=null;
+const ROUND_NAMES={bar:"Bar chart",hist:"Histogram",poly:"Frequency polygon",ogive:"Cumulative polygon",mix:"Challenge"};
+
+function start(mode){
+  currentMode=mode; score=0; streak=0; ti=0;
+  tasks = mode==='mix' ? ['bar','hist','poly','ogive'] : [mode,mode,mode,mode];
+  $('menu').style.display='none'; $('results').style.display='none'; $('game').style.display='block';
+  $('roundName').textContent=ROUND_NAMES[mode]; upd(); loadTask();
+}
+function backToMenu(){$('game').style.display='none';$('results').style.display='none';$('menu').style.display='block'}
+function upd(){$('score').textContent=score;$('streak').textContent=streak;$('taskNo').textContent=(ti+1)+' / '+tasks.length;$('bar').style.width=(ti/tasks.length*100)+'%'}
+function nextTask(){ti++; if(ti>=tasks.length){finish();return} upd(); loadTask()}
+function finish(){
+  $('game').style.display='none'; $('results').style.display='block';
+  const max=tasks.length*8; const pct=score/max;
+  $('badge').textContent=pct>=.9?'🏆':pct>=.7?'🥈':pct>=.5?'🥉':'📘';
+  $('summary').innerHTML=`You scored <b>${score}</b> of ${max} points in the ${ROUND_NAMES[currentMode]} round. `+(pct>=.9?'Excellent: you can build every chart of Chapter 2.':pct>=.7?'Good work. Check the questions you missed and try again.':'Keep practising: table first, chart second. Read the feedback and play again.');
+}
+function fb(kind,msg){const f=$('fb');f.className='feedback '+kind;f.innerHTML=msg}
+function award(pts){score+=pts;streak++;upd()}
+function miss(){streak=0;upd()}
+
+/* ---------------- task loading ---------------- */
+function loadTask(){
+  const kind=tasks[ti]; $('fb').className='feedback'; $('qs').innerHTML=''; $('stepA').innerHTML=''; $('nextBtn').disabled=true; $('checkBtn').disabled=false;
+  if(kind==='bar') makeBar(); else if(kind==='hist') makeHist(); else if(kind==='poly') makePoly(); else makeOgive();
+}
+
+/* ======================= ROUND 1 · BAR CHART ======================= */
+function makeBar(){
+  const s=CAT_SCEN[ri(0,CAT_SCEN.length-1)]; const cats=shuffle(s.cats.slice()).slice(0,ri(3,Math.min(5,s.cats.length)));
+  const raw=cats.map(()=>ri(2,12)); const g=[5,10,20][ri(0,2)]; const freqs=raw.map(x=>x*g); const n=freqs.reduce((a,b)=>a+b,0);
+  T={kind:'bar',cats,freqs,n,unit:s.unit,ymax:niceUp(Math.max(...freqs)*1.15)};
+  $('scenario').innerHTML=s.t+` In total <b>${n} ${s.unit}s</b> were recorded. The frequency table is below.`;
+  let rows=cats.map((c,i)=>`<tr><td>${c}</td><td class="num">${freqs[i]}</td><td class="num"><input id="rf${i}" placeholder="0.0000"></td><td class="num"><input id="pc${i}" placeholder="0.00"> %</td></tr>`).join('');
+  rows+=`<tr><td><b>Total</b></td><td class="num"><b>${n}</b></td><td class="num"><b>1.0000</b></td><td class="num"><b>100 %</b></td></tr>`;
+  $('tableBox').innerHTML=`<div class="hint">Step 1 · Fill the relative frequency (4 decimals) and the percent (2 decimals).</div><table><tr><th>Category</th><th class="num">Frequency</th><th class="num">Relative frequency</th><th class="num">Percent</th></tr>${rows}</table>`;
+  $('chartHint').innerHTML='Step 2 · Drag the top of each bar up or down until its height equals the frequency in the table.';
+  T.cur=cats.map(()=>0); drawBar();
+}
+function drawBar(){
+  const W=560,H=360,L=60,R=20,Tp=20,B=60,pw=W-L-R,ph=H-Tp-B; const {cats,freqs,cur,ymax}=T;
+  const y=v=>Tp+ph*(1-v/ymax); const step=niceUp(ymax/6);
+  let g=''; for(let v=0;v<=ymax;v+=step){g+=`<line x1="${L}" y1="${y(v)}" x2="${W-R}" y2="${y(v)}" stroke="#e2e6ea"/><text x="${L-8}" y="${y(v)+4}" font-size="11" text-anchor="end" fill="#748995">${v}</text>`}
+  const slot=pw/cats.length, bw=slot*.55;
+  let bars=''; cats.forEach((c,i)=>{const x=L+slot*i+(slot-bw)/2; const h=y(0)-y(cur[i]);
+    bars+=`<rect data-i="${i}" x="${x}" y="${y(cur[i])}" width="${bw}" height="${Math.max(h,0)}" fill="#008DC3" opacity=".9"/><rect data-i="${i}" class="grab" x="${x}" y="${y(cur[i])-10}" width="${bw}" height="20" fill="transparent" style="cursor:ns-resize"/><text x="${x+bw/2}" y="${y(cur[i])-6}" font-size="12" text-anchor="middle" fill="#0B5F86" font-weight="bold">${cur[i]}</text><text x="${x+bw/2}" y="${H-B+18}" font-size="12" text-anchor="middle" fill="#1d2731">${c}</text>`});
+  $('chartBox').innerHTML=`<svg class="chart" id="svg" viewBox="0 0 ${W} ${H}"><text x="${L}" y="12" font-size="11" fill="#748995">Number of ${T.unit}s</text>${g}<line x1="${L}" y1="${y(0)}" x2="${W-R}" y2="${y(0)}" stroke="#1d2731" stroke-width="1.5"/>${bars}<text x="${(L+W-R)/2}" y="${H-8}" font-size="12" text-anchor="middle" fill="#748995">Category</text></svg>`;
+  attachDrag((i,val)=>{T.cur[i]=Math.max(0,Math.min(ymax,Math.round(val)));drawBar()}, v=>{const r=$('svg').getBoundingClientRect(); const yy=(v-r.top)/r.height*H; return (y(0)-yy)/ph*ymax});
+}
+
+/* ======================= ROUND 2 · HISTOGRAM ======================= */
+function makeHist(){
+  const s=NUM_SCEN[ri(0,NUM_SCEN.length-1)]; const n=[24,30,40,48,60][ri(0,4)]; const k=kRule(n);
+  const range=s.hi-s.lo; const rawW=range/k; const width=niceUp(rawW); const start=Math.floor(s.lo/width)*width;
+  // generate n values inside [lo,hi] with a bump
+  const hiCap=start+k*width-1, hi=Math.min(s.hi,hiCap), lo=s.lo;
+  const vals=[]; for(let i=0;i<n;i++){let v=lo+(Math.random()+Math.random()+Math.random())/3*(hi-lo); v=Math.round(v); vals.push(Math.min(hi,Math.max(lo,v)))}
+  vals[0]=lo; vals[1]=hi; shuffle(vals);
+  let kk=1; while(start+kk*width<=hi)kk++;
+  const freqs=[]; for(let j=0;j<kk;j++){freqs.push(vals.filter(v=>v>=start+j*width&&v<start+(j+1)*width).length)}
+  T={kind:'hist',vals,n,k,kk,rawW:(hi-lo)/k,width,start,freqs,unit:s.unit,money:s.money,lo,hi,ymax:niceUp(Math.max(...freqs)*1.2)};
+  const money=s.money?RY:'';
+  $('scenario').innerHTML=`Here are ${s.t} for <b>${n} ${s.unit}s</b>. Minimum <b>${money}${fmt(lo)}</b>, maximum <b>${money}${fmt(hi)}</b>.<br><span style="font-family:monospace;font-size:.95rem">${vals.map(fmt).join(', ')}</span>`;
+  $('stepA').innerHTML=`<div class="q"><div class="qt">Step 1 · Using the 2<sup>k</sup> &gt; n rule, how many classes? &nbsp;<input id="kIn" style="width:60px;padding:5px;border:1.5px solid #cbd5dc;border-radius:8px"> &nbsp;&nbsp; Step 2 · Class width ≥ (max − min) ÷ k = ${((hi-lo)/k).toFixed(2)} → convenient width used here: <b>${fmt(width)}</b>, first class starts at <b>${fmt(start)}</b>.</div>`;
+  const cls=[]; for(let j=0;j<kk;j++)cls.push(`${fmt(start+j*width)} up to ${fmt(start+(j+1)*width)}`);
+  T.cls=cls;
+  let rows=cls.map((c,j)=>`<tr><td>${c}</td><td class="num"><input id="f${j}" placeholder="?"></td></tr>`).join('');
+  rows+=`<tr><td><b>Total</b></td><td class="num"><b>${n}</b></td></tr>`;
+  $('tableBox').innerHTML=`<div class="hint">Step 3 · Count the values in each class (“up to” excludes the upper limit).</div><table><tr><th>Class</th><th class="num">Frequency</th></tr>${rows}</table>`;
+  $('chartHint').innerHTML='Step 4 · Drag the top of each histogram bar to the frequency you counted. Bars touch: no gaps.';
+  T.cur=freqs.map(()=>0); drawHist(false);
+}
+function drawHist(polygon){
+  const W=560,H=360,L=60,R=20,Tp=20,B=60,pw=W-L-R,ph=H-Tp-B; const {kk,width,start,cur,ymax}=T;
+  const y=v=>Tp+ph*(1-v/ymax); const x=v=>L+pw*(v-start)/(kk*width); const step=niceUp(ymax/6);
+  let g=''; for(let v=0;v<=ymax;v+=step){g+=`<line x1="${L}" y1="${y(v)}" x2="${W-R}" y2="${y(v)}" stroke="#e2e6ea"/><text x="${L-8}" y="${y(v)+4}" font-size="11" text-anchor="end" fill="#748995">${v}</text>`}
+  let bars='',ticks='';
+  for(let j=0;j<kk;j++){const x0=x(start+j*width),x1=x(start+(j+1)*width);
+    bars+=`<rect data-i="${j}" x="${x0}" y="${y(cur[j])}" width="${x1-x0}" height="${Math.max(0,y(0)-y(cur[j]))}" fill="#008DC3" opacity=".9"/><rect data-i="${j}" class="grab" x="${x0}" y="${y(cur[j])-10}" width="${x1-x0}" height="20" fill="transparent" style="cursor:ns-resize"/><text x="${(x0+x1)/2}" y="${y(cur[j])-6}" font-size="12" text-anchor="middle" fill="#0B5F86" font-weight="bold">${cur[j]}</text>`}
+  for(let j=0;j<=kk;j++){ticks+=`<text x="${x(start+j*width)}" y="${H-B+18}" font-size="11" text-anchor="middle" fill="#1d2731">${fmt(start+j*width)}</text>`}
+  $('chartBox').innerHTML=`<svg class="chart" id="svg" viewBox="0 0 ${W} ${H}"><text x="${L}" y="12" font-size="11" fill="#748995">Frequency</text>${g}<line x1="${L}" y1="${y(0)}" x2="${W-R}" y2="${y(0)}" stroke="#1d2731" stroke-width="1.5"/>${bars}${ticks}<text x="${(L+W-R)/2}" y="${H-8}" font-size="12" text-anchor="middle" fill="#748995">Class limits</text></svg>`;
+  attachDrag((i,val)=>{T.cur[i]=Math.max(0,Math.min(ymax,Math.round(val)));drawHist()}, v=>{const r=$('svg').getBoundingClientRect(); const yy=(v-r.top)/r.height*H; return (y(0)-yy)/ph*ymax});
+}
+
+/* ======================= ROUND 3 · FREQUENCY POLYGON ======================= */
+function makeDist(){
+  const s=NUM_SCEN[ri(0,NUM_SCEN.length-1)]; const k=ri(5,7);   const w=niceUp((s.hi-s.lo)/k); const start=Math.floor(s.lo/w)*w; const freqs=[]; const shape=shuffle([1,2,3,4,3,2,1,1]).slice(0,k);
+  for(let j=0;j<k;j++)freqs.push(shape[j]*ri(2,6));
+  const n=freqs.reduce((a,b)=>a+b,0);
+  const cls=[]; for(let j=0;j<k;j++)cls.push(`${fmt(start+j*w)} up to ${fmt(start+(j+1)*w)}`);
+  return {s,k,width:w,start,freqs,n,cls};
+}
+function makePoly(){
+  const d=makeDist(); T={kind:'poly',...d,unit:d.s.unit,money:d.s.money,kk:d.k,ymax:niceUp(Math.max(...d.freqs)*1.25)};
+  $('scenario').innerHTML=`A frequency distribution of ${d.s.t} for <b>${d.n} ${d.s.unit}s</b> is given below.`;
+  let rows=d.cls.map((c,j)=>`<tr><td>${c}</td><td class="num"><input id="m${j}" placeholder="?"></td><td class="num">${d.freqs[j]}</td></tr>`).join('');
+  rows+=`<tr><td><b>Total</b></td><td></td><td class="num"><b>${d.n}</b></td></tr>`;
+  $('tableBox').innerHTML=`<div class="hint">Step 1 · Fill the midpoint of every class: (lower + upper) ÷ 2.</div><table><tr><th>Class</th><th class="num">Midpoint</th><th class="num">Frequency</th></tr>${rows}</table>`;
+  $('chartHint').innerHTML='Step 2 · Drag each point of the polygon up to its frequency. The points sit above the class midpoints; the polygon is closed at both ends.';
+  T.cur=d.freqs.map(()=>0); drawPoly();
+}
+function drawPoly(){
+  const W=560,H=360,L=60,R=20,Tp=20,B=60,pw=W-L-R,ph=H-Tp-B; const {kk,width,start,cur,ymax}=T;
+  const y=v=>Tp+ph*(1-v/ymax); const x=v=>L+pw*(v-(start-width))/((kk+2)*width); const step=niceUp(ymax/6);
+  let g=''; for(let v=0;v<=ymax;v+=step){g+=`<line x1="${L}" y1="${y(v)}" x2="${W-R}" y2="${y(v)}" stroke="#e2e6ea"/><text x="${L-8}" y="${y(v)+4}" font-size="11" text-anchor="end" fill="#748995">${v}</text>`}
+  const mids=[]; for(let j=-1;j<=kk;j++)mids.push(start+j*width+width/2);
+  const ys=[0,...cur,0]; let pts='',line='',ticks='';
+  mids.forEach((m,i)=>{line+=`${x(m)},${y(ys[i])} `});
+  mids.forEach((m,i)=>{ if(i===0||i===mids.length-1){pts+=`<circle cx="${x(m)}" cy="${y(0)}" r="4" fill="#748995"/>`;return}
+    pts+=`<circle data-i="${i-1}" class="grab" cx="${x(m)}" cy="${y(ys[i])}" r="9" fill="#0B5F86" stroke="#fff" stroke-width="2" style="cursor:ns-resize"/><text x="${x(m)}" y="${y(ys[i])-13}" font-size="12" text-anchor="middle" fill="#0B5F86" font-weight="bold">${ys[i]}</text>`;
+    ticks+=`<text x="${x(m)}" y="${H-B+18}" font-size="11" text-anchor="middle" fill="#1d2731">${fmt(m)}</text>`});
+  for(let j=0;j<=kk;j++){ticks+=`<line x1="${x(start+j*width)}" y1="${y(0)}" x2="${x(start+j*width)}" y2="${y(0)+5}" stroke="#748995"/>`}
+  $('chartBox').innerHTML=`<svg class="chart" id="svg" viewBox="0 0 ${W} ${H}"><text x="${L}" y="12" font-size="11" fill="#748995">Frequency</text>${g}<line x1="${L}" y1="${y(0)}" x2="${W-R}" y2="${y(0)}" stroke="#1d2731" stroke-width="1.5"/><polyline points="${line}" fill="none" stroke="#008DC3" stroke-width="2.5"/>${pts}${ticks}<text x="${(L+W-R)/2}" y="${H-8}" font-size="12" text-anchor="middle" fill="#748995">Class midpoints</text></svg>`;
+  attachDrag((i,val)=>{T.cur[i]=Math.max(0,Math.min(ymax,Math.round(val)));drawPoly()}, v=>{const r=$('svg').getBoundingClientRect(); const yy=(v-r.top)/r.height*H; return (y(0)-yy)/ph*ymax});
+}
+
+/* ======================= ROUND 4 · CUMULATIVE POLYGON ======================= */
+function makeOgive(){
+  const d=makeDist(); const cum=[]; let s=0; d.freqs.forEach(f=>{s+=f;cum.push(s)});
+  T={kind:'ogive',...d,cum,unit:d.s.unit,money:d.s.money,kk:d.k,ymax:niceUp(d.n*1.1)};
+  $('scenario').innerHTML=`A frequency distribution of ${d.s.t} for <b>${d.n} ${d.s.unit}s</b> is given below.`;
+  let rows=d.cls.map((c,j)=>`<tr><td>less than ${fmt(d.start+(j+1)*d.width)}</td><td class="num">${d.freqs[j]}</td><td class="num"><input id="c${j}" placeholder="?"></td></tr>`).join('');
+  $('tableBox').innerHTML=`<div class="hint">Step 1 · Fill the cumulative frequency: add each frequency to all the ones before it. The last value must be ${d.n}.</div><table><tr><th>Value</th><th class="num">Frequency</th><th class="num">Cumulative frequency</th></tr>${rows}</table>`;
+  $('chartHint').innerHTML='Step 2 · Drag each point up to its cumulative frequency. The points sit above the <b>upper limits</b>; the first point (lower limit of the first class, 0) is fixed.';
+  T.cur=d.freqs.map(()=>0); drawOgive();
+}
+function drawOgive(){
+  const W=560,H=360,L=60,R=40,Tp=20,B=60,pw=W-L-R,ph=H-Tp-B; const {kk,width,start,cur,ymax,n}=T;
+  const y=v=>Tp+ph*(1-v/ymax); const x=v=>L+pw*(v-start)/(kk*width); const step=niceUp(ymax/6);
+  let g=''; for(let v=0;v<=ymax;v+=step){g+=`<line x1="${L}" y1="${y(v)}" x2="${W-R}" y2="${y(v)}" stroke="#e2e6ea"/><text x="${L-8}" y="${y(v)+4}" font-size="11" text-anchor="end" fill="#748995">${v}</text>`}
+  [0,25,50,75,100].forEach(p=>{g+=`<text x="${W-R+6}" y="${y(n*p/100)+4}" font-size="10" fill="#748995">${p}%</text>`});
+  let line=`${x(start)},${y(0)} `,pts=`<circle cx="${x(start)}" cy="${y(0)}" r="4" fill="#748995"/>`,ticks=`<text x="${x(start)}" y="${H-B+18}" font-size="11" text-anchor="middle" fill="#1d2731">${fmt(start)}</text>`;
+  for(let j=0;j<kk;j++){const ux=x(start+(j+1)*width); line+=`${ux},${y(cur[j])} `;
+    pts+=`<circle data-i="${j}" class="grab" cx="${ux}" cy="${y(cur[j])}" r="9" fill="#0B5F86" stroke="#fff" stroke-width="2" style="cursor:ns-resize"/><text x="${ux}" y="${y(cur[j])-13}" font-size="12" text-anchor="middle" fill="#0B5F86" font-weight="bold">${cur[j]}</text>`;
+    ticks+=`<text x="${ux}" y="${H-B+18}" font-size="11" text-anchor="middle" fill="#1d2731">${fmt(start+(j+1)*width)}</text>`}
+  $('chartBox').innerHTML=`<svg class="chart" id="svg" viewBox="0 0 ${W} ${H}"><text x="${L}" y="12" font-size="11" fill="#748995">Cumulative frequency</text>${g}<line x1="${L}" y1="${y(0)}" x2="${W-R}" y2="${y(0)}" stroke="#1d2731" stroke-width="1.5"/><polyline points="${line}" fill="none" stroke="#008DC3" stroke-width="2.5"/>${pts}${ticks}<text x="${(L+W-R)/2}" y="${H-8}" font-size="12" text-anchor="middle" fill="#748995">Upper class limits</text></svg>`;
+  attachDrag((i,val)=>{T.cur[i]=Math.max(0,Math.min(ymax,Math.round(val)));drawOgive()}, v=>{const r=$('svg').getBoundingClientRect(); const yy=(v-r.top)/r.height*H; return (y(0)-yy)/ph*ymax});
+}
+
+/* ---------------- dragging (pointer events on the SVG) ---------------- */
+function attachDrag(setter, toVal){
+  T.setter=setter; T.toVal=toVal;
+  const box=$('chartBox'); if(box.dataset.bound)return; box.dataset.bound=1;
+  box.addEventListener('pointerdown',e=>{const t=e.target.closest('.grab'); if(!t)return; drag={i:+t.dataset.i}; box.setPointerCapture(e.pointerId); T.setter(drag.i,T.toVal(e.clientY)); e.preventDefault()});
+  box.addEventListener('pointermove',e=>{if(!drag)return; T.setter(drag.i,T.toVal(e.clientY))});
+  box.addEventListener('pointerup',()=>{drag=null}); box.addEventListener('pointercancel',()=>{drag=null});
+}
+function resetChart(){T.cur=T.cur.map(()=>0); if(T.kind==='bar')drawBar(); else if(T.kind==='hist')drawHist(); else if(T.kind==='poly')drawPoly(); else drawOgive()}
+
+/* ---------------- checking ---------------- */
+function near(a,b,tol){return Math.abs(a-b)<=tol}
+function checkWork(){
+  let tableOk=true, chartOk=true, notes=[];
+  if(T.kind==='bar'){
+    T.cats.forEach((c,i)=>{const rf=T.freqs[i]/T.n; const a=parseFloat($('rf'+i).value), b=parseFloat($('pc'+i).value);
+      const okA=near(a,rf,0.00006), okB=near(b,rf*100,0.006); $('rf'+i).className=okA?'ok':'bad'; $('pc'+i).className=okB?'ok':'bad'; if(!okA||!okB){tableOk=false;notes.push(`${c}: ${T.freqs[i]}/${T.n} = ${rf.toFixed(4)} = ${(rf*100).toFixed(2)}%`)}});
+    chartOk=T.cur.every((v,i)=>v===T.freqs[i]);
+  } else if(T.kind==='hist'){
+    const kIn=parseInt($('kIn').value); const kOk=kIn===T.k; $('kIn').style.borderColor=kOk?'#1f9d55':'#d64545'; if(!kOk){tableOk=false;notes.push(`k: 2<sup>${T.k-1}</sup> = ${Math.pow(2,T.k-1)} ≤ ${T.n} &lt; ${Math.pow(2,T.k)} = 2<sup>${T.k}</sup> → k = ${T.k}`)}
+    T.freqs.forEach((f,j)=>{const a=parseInt($('f'+j).value); const ok=a===f; $('f'+j).className=ok?'ok':'bad'; if(!ok){tableOk=false;notes.push(`${T.cls[j]}: ${f} values`)}});
+    chartOk=T.cur.every((v,j)=>v===T.freqs[j]);
+  } else if(T.kind==='poly'){
+    T.cls.forEach((c,j)=>{const m=T.start+j*T.width+T.width/2; const a=parseFloat($('m'+j).value); const ok=near(a,m,0.01); $('m'+j).className=ok?'ok':'bad'; if(!ok){tableOk=false;notes.push(`${c}: (${fmt(T.start+j*T.width)} + ${fmt(T.start+(j+1)*T.width)}) ÷ 2 = ${fmt(m)}`)}});
+    chartOk=T.cur.every((v,j)=>v===T.freqs[j]);
+  } else {
+    T.cum.forEach((cv,j)=>{const a=parseInt($('c'+j).value); const ok=a===cv; $('c'+j).className=ok?'ok':'bad'; if(!ok){tableOk=false;notes.push(`less than ${fmt(T.start+(j+1)*T.width)}: ${j===0?T.freqs[0]:T.cum[j-1]+' + '+T.freqs[j]} = ${cv}`)}});
+    chartOk=T.cur.every((v,j)=>v===T.cum[j]);
+  }
+  const target = T.kind==='ogive'?T.cum:T.freqs;
+  let msg='';
+  if(tableOk&&chartOk){msg='<b>Both correct!</b> The table and the chart match. Now answer the reading questions below.'; award(4); fb('ok',msg)}
+  else{
+    if(!tableOk)msg+='<b>Table:</b> some cells are wrong (marked red). Correct values: '+notes.join(' · ')+'. ';
+    if(!chartOk){const wrong=T.cur.map((v,i)=>v!==target[i]?i:-1).filter(i=>i>=0); msg+=`<b>Chart:</b> ${wrong.length} ${T.kind==='bar'||T.kind==='hist'?'bar(s)':'point(s)'} not at the right height (should be ${wrong.map(i=>target[i]).join(', ')}).`}
+    msg+=' Fix them and check again: or press Next to see the questions.'; miss(); fb('bad',msg);
+  }
+  if(tableOk&&chartOk){$('checkBtn').disabled=true; showQuestions()}
+  else{ if(!$('qs').innerHTML) $('nextBtn').disabled=false; T.tries=(T.tries||0)+1; if(T.tries>=3){fb('info',msg+' <br><b>Solution shown.</b> The chart is set to the correct heights.'); T.cur=target.slice(); resetChartTo(); $('checkBtn').disabled=true; showQuestions()} }
+}
+function resetChartTo(){if(T.kind==='bar')drawBar(); else if(T.kind==='hist')drawHist(); else if(T.kind==='poly')drawPoly(); else drawOgive()}
+
+/* ---------------- reading questions ---------------- */
+function mkQ(text, correct, wrongs, why){return {text,correct,wrongs:wrongs.filter(w=>w!==correct).slice(0,3),why}}
+function pctS(x){return (x*100).toFixed(2)+'%'}
+function showQuestions(){
+  const Q=[]; const money=T.money?RY:'';
+  if(T.kind==='bar'){
+    const top=T.freqs.indexOf(Math.max(...T.freqs)); const i=ri(0,T.cats.length-1); const j=(i+1)%T.cats.length;
+    Q.push(mkQ('Which category is the mode?', T.cats[top], T.cats.filter((c,k)=>k!==top), 'The mode is the category with the tallest bar.'));
+    Q.push(mkQ(`What percent of the ${T.unit}s are “${T.cats[i]}” or “${T.cats[j]}”?`, pctS((T.freqs[i]+T.freqs[j])/T.n), [pctS(T.freqs[i]/T.n), pctS(1-(T.freqs[i]+T.freqs[j])/T.n), pctS(T.freqs[j]/T.n)], 'Add the two frequencies, divide by the total, times 100.'));
+    Q.push(mkQ('This table is called a …', 'frequency table (qualitative variable)', ['frequency distribution (classes of numbers)','cumulative distribution','histogram'], 'Categories → frequency table. Numerical classes → frequency distribution.'));
+    Q.push(mkQ('Which chart could ALSO show this table?', 'A pie chart: the categories are parts of a whole', ['A histogram: the bars would touch','A cumulative polygon','A dot plot of the categories'], 'Qualitative data: bar chart or pie chart.'));
+  } else if(T.kind==='hist'){
+    const top=T.freqs.indexOf(Math.max(...T.freqs)); const j=ri(1,T.kk-1); const below=T.freqs.slice(0,j).reduce((a,b)=>a+b,0); const lim=T.start+j*T.width;
+    Q.push(mkQ('Which class has the highest frequency (the modal class)?', T.cls[top], T.cls.filter((c,k)=>k!==top), 'The tallest bar.'));
+    Q.push(mkQ(`How many ${T.unit}s have a value less than ${money}${fmt(lim)}?`, String(below), [String(T.n-below), String(T.freqs[j-1]), String(below+T.freqs[j])], 'Add the frequencies of the classes below that limit.'));
+    Q.push(mkQ(`How many ${T.unit}s have a value of ${money}${fmt(lim)} or more?`, String(T.n-below), [String(below), String(T.freqs[j]), String(T.n)], 'Total minus the number below the limit.'));
+    Q.push(mkQ(`A value of exactly ${money}${fmt(lim)} belongs to the class …`, T.cls[j], [T.cls[j-1], 'both classes', 'no class'], '“Up to” excludes the upper limit, so the value starts the next class.'));
+  } else if(T.kind==='poly'){
+    const top=T.freqs.indexOf(Math.max(...T.freqs)); const j=ri(0,T.kk-1); const m=T.start+j*T.width+T.width/2; const rf=T.freqs[j]/T.n;
+    Q.push(mkQ('Which point is the peak of the polygon?', `(${fmt(T.start+top*T.width+T.width/2)}, ${T.freqs[top]})`, T.freqs.map((f,k)=>`(${fmt(T.start+k*T.width+T.width/2)}, ${f})`).filter((p,k)=>k!==top), 'The point with the highest frequency.'));
+    Q.push(mkQ(`What percent of the ${T.unit}s are in the class “${T.cls[j]}”?`, pctS(rf), [pctS(1-rf), pctS(T.freqs[j]/T.kk/10), pctS(T.freqs[(j+1)%T.kk]/T.n)], 'Frequency ÷ total × 100.'));
+    Q.push(mkQ('Why draw a polygon instead of a histogram?', 'To compare two or more distributions on one chart', ['Because polygons show every single value','Because the classes have different widths','Because it uses categories'], 'Lines can share a chart; overlapping bars cannot.'));
+    Q.push(mkQ('The horizontal position of each polygon point is the …', 'class midpoint', ['upper class limit','lower class limit','frequency'], 'Polygon = midpoints; cumulative polygon = upper limits.'));
+  } else {
+    const j=ri(1,T.kk-1); const lim=T.start+j*T.width; const below=T.cum[j-1]; const jj=ri(0,T.kk-1);
+    Q.push(mkQ(`How many ${T.unit}s have a value less than ${money}${fmt(lim)}?`, String(below), [String(T.n-below), String(T.freqs[j]), String(T.cum[j])], 'Read the cumulative frequency at that upper limit.'));
+    Q.push(mkQ(`What percent of the ${T.unit}s have a value of ${money}${fmt(lim)} or more?`, pctS(1-below/T.n), [pctS(below/T.n), pctS(T.freqs[j]/T.n), pctS(T.cum[j]/T.n)], '100% minus the percent below.'));
+    Q.push(mkQ('The last point of the cumulative polygon is always at …', `the total, ${T.n} (100%)`, ['the largest frequency','the class width','zero'], 'A running total ends at n.'));
+    Q.push(mkQ(`The cumulative relative frequency at “less than ${fmt(T.start+(jj+1)*T.width)}” is …`, (T.cum[jj]/T.n).toFixed(4), [(T.freqs[jj]/T.n).toFixed(4), (1-T.cum[jj]/T.n).toFixed(4), (T.cum[jj]/100).toFixed(4)], 'Cumulative frequency ÷ total.'));
+  }
+  T.Q=Q; T.qDone=0;
+  $('qs').innerHTML='<div class="hint" style="margin-bottom:6px">Reading questions · 1 point each</div>'+Q.map((q,qi)=>{const opts=shuffle([q.correct,...q.wrongs]).map(o=>`<div class="opt" onclick="pick(${qi},this)">${o}</div>`).join(''); return `<div class="q" id="q${qi}"><div class="qt">Q${qi+1}. ${q.text}</div><div class="opts">${opts}</div><div class="qfb" id="qfb${qi}"></div></div>`}).join('');
+}
+function pick(qi,el){
+  const q=T.Q[qi]; const box=$('q'+qi); if(box.dataset.done)return; box.dataset.done=1;
+  const ok=el.textContent===q.correct; el.classList.add(ok?'right':'wrong');
+  if(!ok){[...box.querySelectorAll('.opt')].find(o=>o.textContent===q.correct).classList.add('right'); miss()} else award(1);
+  $('qfb'+qi).innerHTML=(ok?'✅ Correct. ':'❌ Not quite. ')+q.why;
+  T.qDone++; if(T.qDone>=T.Q.length){$('nextBtn').disabled=false; $('nextBtn').textContent= ti+1>=tasks.length?'Finish ▶':'Next ▶'}
+}
+</script>
+</body>
+</html>
