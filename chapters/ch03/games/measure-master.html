@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QUA107 · Chapter 3 · Measure Master</title>
+<style>
+  @font-face{font-family:'SaudiRiyal';src:url(data:font/woff2;base64,d09GMgABAAAAAALQAA0AAAAABmAAAAJ8AAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP0ZGVE0cBmAAgkIIBBEICoFkgV4LCgABNgIkAxAEIAWEEAcqG2sFII7RS88cU5STILSS4qFvjPZnd860iVlEzJpYwjMh8YiUTIsk9dBOfHC/9vZR7+OS2G6oe1PNYtZcG1UbGepdnMqJRTj3AJ5FY9IAWgKhiIR0DlyzXIEKVaimFaxBzV0T+RGsse4hpRCTEPDx7aMa4OvPoMk4KXhL5vMY1UB5WY7wil40PlkLgaKhBUABgAsPAvLRij/+VKpxllpFuEEAYBRBRcUgAvbQEhikbRSkFPizq/H1u30IEI2sryggfgshfVNFTx8rLSB2NQSQoBmJNXAYQDuWCaBkNk4Y6XTktbJn66O7M6vZ83ezSbxW6/iVzez5jTxCeJLW5XmBbCPHw3SOjRmM/aS3ybfKobiYoLQuJ4d9mS3vxTZN5kOO0ZFJEq+07kG3XgPntIZf9fzh+Y8wzef6vKPRKbX7JysP29JgDtzada0fVbRLsLJnT0/b//VdXZ13HKYlGNjVkqA6hFzTjS0WI8JbgyB4PZu6cdPM/a/ZqP4asvyY8r8A0KyAoI5rXKVmLVA/CQBA5nO2QD6HfC4bQZojgIIQOEAJoNMbBKCPPQJCizsIKJq8QEA15U2A1BKtAjToik0Q0KglbtAS2YJ1YCH0ioSi00OoTumE1OsfGgyH9ec06g1/fqpUa1GrRJFi9SixPBIUx3AO5KgctQoUq4Cvgap5kpe0nMqpLSiuAK6qVK9EvXIF8nG4+niyKc7nwCUFijQoVyjgGjQHOKaqK1XVaxUFhAZTYihXVDEjcnPOFDgFWBa7OYmiobaogHIlo64UAMna3FnBFYg9QUWuObXqlEDTKZbhakpMwBLNZEytZMmTwscLsHtoHQQAgDxlyT4H) format('woff2')}
+  :root{--blue:#008DC3;--blue-dark:#0075A3;--grey:#748995;--cream:#E3E0D2;--ink:#1d2731;--ok:#1f9d55;--bad:#d64545;--card:#ffffff}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--cream);color:var(--ink);line-height:1.4}
+  header{background:var(--blue);color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  header h1{margin:0;font-size:1.25rem;letter-spacing:.2px}
+  header .sub{font-size:.85rem;opacity:.9}
+  header a{color:inherit}
+  .sar{font-family:'SaudiRiyal',sans-serif;font-style:normal}
+  .wrap{max-width:1000px;margin:0 auto;padding:18px}
+  .hud{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+  .stat{background:var(--card);border-radius:12px;padding:10px 14px;min-width:110px;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+  .stat .lbl{font-size:.72rem;color:var(--grey);text-transform:uppercase;letter-spacing:.06em}
+  .stat .val{font-size:1.4rem;font-weight:700;color:var(--blue-dark)}
+  .panel{background:var(--card);border-radius:16px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.08);margin-bottom:16px}
+  .btn{background:var(--blue);color:#fff;border:0;border-radius:999px;padding:10px 20px;font-size:1rem;cursor:pointer;font-weight:600}
+  .btn:hover{background:var(--blue-dark)}
+  .btn.ghost{background:transparent;color:var(--blue-dark);border:2px solid var(--blue)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+  .mode{border:2px solid #e2e6ea;border-radius:14px;padding:16px;cursor:pointer;transition:.15s;background:#fff}
+  .mode:hover{border-color:var(--blue);transform:translateY(-2px)}
+  .mode h3{margin:0 0 6px;color:var(--blue-dark)}
+  .mode p{margin:0;font-size:.92rem;color:#445}
+  .hint{font-size:.9rem;color:var(--grey)}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+  table{border-collapse:collapse;font-size:.95rem;margin:8px 0}
+  th,td{border:1px solid #e2e6ea;padding:6px 10px;text-align:center}
+  th{background:#eef5f8;color:var(--blue-dark)}
+  .prompt{font-size:1.06rem;margin:0 0 10px}
+  .data{font-family:Consolas,Menlo,monospace;background:#f4f6f2;border:1px solid #e2e6ea;border-radius:10px;padding:10px 12px;font-size:1.05rem;letter-spacing:.03em;display:inline-block;margin:4px 0 10px}
+  .opts{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
+  .opt{border:2px solid #e2e6ea;border-radius:12px;padding:10px 12px;cursor:pointer;background:#fff;font-size:1rem;text-align:left}
+  .opt .lbl{display:inline-block;background:#eef5f8;color:var(--blue-dark);font-weight:700;border-radius:6px;padding:1px 8px;margin-right:8px}
+  .opt:hover{border-color:var(--blue)}
+  .opt.right{border-color:var(--ok);background:#f0faf4}
+  .opt.wrong{border-color:var(--bad);background:#fdf3f3}
+  .numin{display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap}
+  .numin input{font-size:1.15rem;padding:9px 12px;border:2px solid #cfd8de;border-radius:10px;width:170px}
+  .numin input:focus{outline:none;border-color:var(--blue)}
+  .feedback{display:none;border-radius:12px;padding:12px 14px;margin-top:12px;font-size:.98rem}
+  .feedback.ok{display:block;background:#f0faf4;border:1px solid var(--ok)}
+  .feedback.bad{display:block;background:#fdf3f3;border:1px solid var(--bad)}
+  .barwrap{height:8px;background:#dfe5e9;border-radius:99px;margin:10px 0 16px;overflow:hidden}
+  #bar{height:100%;width:0;background:var(--blue);transition:width .3s}
+  #results .badge{font-size:3rem}
+  #review td:first-child{text-align:left}
+  footer{text-align:center;color:var(--grey);font-size:.8rem;padding:14px}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>🧭 Measure Master</h1><div class="sub">QUA 107 · Chapter 3 · Measures of central tendency (LO 3.1)</div></div>
+  <div class="sub" style="text-align:right">King Saud University · College of Business Administration<br><a href="../../../index.html">QUA 107 course page</a> · <a href="../slides.html">Chapter 3 slides</a></div>
+</header>
+<div class="wrap">
+  <div id="menu">
+    <div class="panel"><p class="prompt"><b>Choose a round.</b> Every play generates new numbers, so you can practise as often as you like. Rounds cover the mean, the median, the mode, choosing the best measure, and the weighted and geometric means.</p>
+      <div class="modes" id="modeCards"></div>
+    </div>
+  </div>
+  <div id="game" style="display:none">
+    <div class="hud">
+      <div class="stat"><div class="lbl">Question</div><div class="val" id="caseNo">1</div></div>
+      <div class="stat"><div class="lbl">Score</div><div class="val" id="score">0</div></div>
+      <div class="stat"><div class="lbl">Streak</div><div class="val" id="streak">0</div></div>
+      <div class="stat" style="flex:1"><div class="lbl">Round</div><div class="val" id="roundName" style="font-size:1.05rem;padding-top:6px"></div></div>
+    </div>
+    <div class="barwrap"><div id="bar"></div></div>
+    <div class="panel">
+      <p class="prompt" id="prompt"></p>
+      <div id="stage"></div>
+      <div id="answerArea"></div>
+      <div class="feedback" id="fb"></div>
+      <div class="row" style="margin-top:14px">
+        <button class="btn ghost" onclick="menu()">◀ Rounds</button>
+        <button class="btn" id="nextBtn" onclick="next()" disabled>Next ▶</button>
+      </div>
+    </div>
+  </div>
+  <div id="results" style="display:none">
+    <div class="panel" style="text-align:center">
+      <div class="badge" id="badge"></div>
+      <p class="prompt" id="summary"></p>
+      <button class="btn" onclick="menu()">Play another round</button>
+    </div>
+    <div class="panel"><b>Review</b>
+      <table id="review" style="width:100%"><thead><tr><th>Question</th><th>Correct answer</th><th>Your answer</th></tr></thead><tbody></tbody></table>
+    </div>
+  </div>
+</div>
+<footer>QUA 107 · Introduction to Business Statistics · Practice game (not graded).</footer>
+<script>
+const $=id=>document.getElementById(id);
+const RY='<span class="sar">ê</span>';
+function ri(a,b){return a+Math.floor(Math.random()*(b-a+1))}
+function pick(a){return a[Math.floor(Math.random()*a.length)]}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function sampleDistinct(n,lo,hi){const s=new Set();while(s.size<n)s.add(ri(lo,hi));return [...s]}
+function fmt(x){return Math.abs(x-Math.round(x))<1e-9?String(Math.round(x)):x.toFixed(2).replace(/0$/,'').replace(/\.$/,'')}
+function mean(a){return a.reduce((s,v)=>s+v,0)/a.length}
+function median(a){const s=a.slice().sort((x,y)=>x-y),n=s.length;return n%2?s[(n-1)/2]:(s[n/2-1]+s[n/2])/2}
+function dataBox(a){return '<div class="data">'+a.join(', ')+'</div>'}
+function sortedTable(a){let h='<tr><th>Position</th>'+a.map((_,i)=>'<th>'+(i+1)+'</th>').join('')+'</tr>';let r='<tr><td><b>Value</b></td>'+a.map(v=>'<td>'+v+'</td>').join('')+'</tr>';return '<table>'+h+r+'</table>'}
+
+const CTXS=[['cups sold per hour at one branch of The Coffee Address','cups'],
+ ['laptops sold per day at a Jarir branch','laptops'],
+ ['customers served per hour at a bank branch','customers'],
+ ['orders delivered per day by a Jahez driver','orders'],
+ ['meals sold per hour at an Al Baik branch','meals'],
+ ['rooms occupied per night at a hotel in AlUla','rooms'],
+ ['calls answered per hour at a stc call centre','calls'],
+ ['cars serviced per day at a garage in Dammam','cars']];
+function gMean(){
+  const [c,u]=pick(CTXS); const n=pick([4,5,6]); const a=Array.from({length:n},()=>ri(8,60));
+  const m=mean(a);
+  return {type:'num',prompt:`<b>Mean Sprint.</b> The number of <b>${c}</b> was recorded ${n} times:`,stage:dataBox(a),
+    answer:+m.toFixed(2),tol:0.02,unit:u,hint:'Round to 2 decimals if needed.',
+    why:`Sum = ${a.reduce((s,v)=>s+v,0)}, divided by ${n}: mean = ${fmt(m)} ${u}.`};
+}
+function gMedian(){
+  const [c,u]=pick(CTXS); const n=pick([5,6,7,8,9,10]); const a=sampleDistinct(n,5,95);
+  const s=a.slice().sort((x,y)=>x-y); const md=median(a);
+  return {type:'num',prompt:`<b>Median Hunt.</b> Values of <b>${c}</b> (unsorted):`,stage:dataBox(a),
+    answer:md,tol:0.011,unit:u,hint:'Sort first! Even count: average the two middle values.',
+    why:`Sorted: ${s.join(', ')}. ${n%2? 'Odd count: the middle ('+((n+1)/2)+'th) value.':'Even count: average of the '+(n/2)+'th and '+(n/2+1)+'th values.'} Median = ${fmt(md)}.`};
+}
+function gMode(){
+  const [c,u]=pick(CTXS);
+  const kind=pick(['one','one','bi','none']);
+  let a,correct,why;
+  if(kind==='one'){const base=sampleDistinct(5,10,40);const m=pick(base);a=shuffle(base.concat([m,m]));
+    correct=String(m);why=`${m} occurs three times, more than any other value.`;
+    const opts=shuffle([{html:String(m),ok:true}].concat(base.filter(v=>v!==m).slice(0,3).map(v=>({html:String(v),ok:false}))));
+    return {type:'mc',prompt:`<b>Mode Spotter.</b> Values of <b>${c}</b>:`,stage:dataBox(a),opts,why};}
+  if(kind==='bi'){const base=sampleDistinct(5,10,40);const m1=base[0],m2=base[1];a=shuffle(base.concat([m1,m2]));
+    why=`Both ${Math.min(m1,m2)} and ${Math.max(m1,m2)} occur twice: the data is bimodal.`;
+    const opts=shuffle([{html:`Bimodal: the modes are ${Math.min(m1,m2)} and ${Math.max(m1,m2)}`,ok:true},
+      {html:`The mode is ${m1} only`,ok:false},{html:`The mode is ${m2} only`,ok:false},{html:'There is no mode',ok:false}]);
+    return {type:'mc',prompt:`<b>Mode Spotter.</b> Values of <b>${c}</b>:`,stage:dataBox(a),opts,why};}
+  a=sampleDistinct(6,10,60);
+  why='Every value occurs exactly once, so there is no mode.';
+  const opts=shuffle([{html:'There is no mode',ok:true},{html:String(Math.max(...a)),ok:false},{html:String(Math.min(...a)),ok:false},{html:fmt(mean(a)),ok:false}]);
+  return {type:'mc',prompt:`<b>Mode Spotter.</b> Values of <b>${c}</b>:`,stage:dataBox(a),opts,why};
+}
+function gBest(){
+  const S=[['Monthly salaries: 8,000, 8,500, 9,000, 9,500 and 60,000','median','one extreme salary pulls the mean far above a typical salary'],
+   ['The favourite drink of 200 customers (Latte, Saudi coffee, …)','mode','a nominal variable has no mean or median'],
+   ['Daily sales over 30 ordinary days, no outliers, roughly symmetric','mean','no outliers: the mean uses every value'],
+   ['House prices in a district with a few very expensive palaces','median','the extreme prices pull the mean up'],
+   ['The most common shoe size to restock','mode','the store needs the most frequent size, not an average'],
+   ['Time to resolve support tickets, a few take many days','median','the long tickets skew the data to the right'],
+   ['Heights of the players of one team, no outliers','mean','small symmetric data: the mean is fine'],
+   ['The payment method to optimize the checkout for','mode','payment method is a category']];
+  const [d,b,w]=pick(S);
+  const opts=shuffle([{html:'The '+b,ok:true}].concat(['mean','median','mode'].filter(x=>x!==b).map(x=>({html:'The '+x,ok:false}))));
+  return {type:'mc',prompt:`<b>Best Measure.</b> ${d}. <br>Which measure of location should you report?`,opts,why:w[0].toUpperCase()+w.slice(1)+'.'};
+}
+function gWeighted(){
+  const k=pick([3,4]); const xs=Array.from({length:k},()=>ri(5,30)); const ws=Array.from({length:k},()=>pick([10,20,25,50,100,150,200]));
+  const rows=xs.map((x,i)=>`<tr><td>Item ${i+1}</td><td>${RY} ${x}</td><td>${ws[i]}</td></tr>`).join('');
+  const wm=xs.reduce((s,x,i)=>s+x*ws[i],0)/ws.reduce((s,w)=>s+w,0);
+  return {type:'num',prompt:`<b>Special Means.</b> A cafe sells ${k} drinks. Compute the <b>weighted mean price per cup sold</b> (2 decimals):`,
+    stage:`<table><tr><th></th><th>Price</th><th>Cups sold (weight)</th></tr>${rows}</table>`,
+    answer:+wm.toFixed(2),tol:0.02,unit:'riyals',hint:'Σ(w·x) ÷ Σw: divide by the SUM OF THE WEIGHTS.',
+    why:`Σ(w·x) = ${xs.reduce((s,x,i)=>s+x*ws[i],0)}; Σw = ${ws.reduce((s,w)=>s+w,0)}; weighted mean = ${wm.toFixed(2)}.`};
+}
+function gGeo(){
+  if(Math.random()<0.5){
+    const n=pick([3,4]); const ps=Array.from({length:n},()=>pick([-20,-10,5,10,20,25,50,100]));
+    let prod=1; ps.forEach(p=>prod*=1+p/100);
+    if(prod<=0.2) return gGeo();
+    const gm=(Math.pow(prod,1/n)-1)*100;
+    return {type:'num',prompt:`<b>Special Means.</b> Growth rates in ${n} consecutive periods: <b>${ps.map(p=>p+'%').join(', ')}</b>.<br>Geometric mean rate per period, in percent (1 decimal):`,
+      answer:+gm.toFixed(1),tol:0.15,unit:'%',hint:'Factors (1 + change) → multiply → nth root → subtract 1.',
+      why:`Product of factors = ${prod.toFixed(3)}; ${n}th root = ${Math.pow(prod,1/n).toFixed(3)}; minus 1 → ${gm.toFixed(1)}% per period.`};
+  }
+  const n=pick([3,4,5]); const start=pick([2000,5000,10000,20000]); const ratio=pick([1.5,2,3,4,5]); const end=start*ratio;
+  const gm=(Math.pow(end/start,1/n)-1)*100;
+  return {type:'num',prompt:`<b>Special Means.</b> An app grew from <b>${start.toLocaleString()}</b> to <b>${end.toLocaleString()}</b> users in <b>${n} years</b>.<br>Average growth per year (geometric mean), in percent (1 decimal):`,
+    answer:+gm.toFixed(1),tol:0.15,unit:'%',hint:'nth root of end/start, minus 1.',
+    why:`end/start = ${ratio}; the ${n}th root is ${Math.pow(ratio,1/n).toFixed(3)}; minus 1 → ${gm.toFixed(1)}% per year.`};
+}
+const MODES=[
+ {name:'Mean Sprint',icon:'⚡',desc:'Compute the mean of small data sets. Fast and clean.',count:8,gen:[gMean]},
+ {name:'Median Hunt',icon:'🎯',desc:'Sort first, then find the middle: odd and even counts.',count:8,gen:[gMedian]},
+ {name:'Mode Spotter',icon:'🔁',desc:'One mode, two modes, or none at all?',count:8,gen:[gMode]},
+ {name:'Best Measure',icon:'⚖️',desc:'Outliers, skew, categories: choose mean, median or mode.',count:8,gen:[gBest]},
+ {name:'Special Means',icon:'🧮',desc:'Weighted mean and geometric mean (growth rates).',count:8,gen:[gWeighted,gGeo]},
+ {name:'Full Challenge',icon:'🏆',desc:'Fifteen mixed questions from all the rounds.',count:15,gen:[gMean,gMedian,gMode,gBest,gWeighted,gGeo]},
+];
+
+// ---------------- engine ----------------
+let deck=[],idx=0,score=0,streak=0,best=0,answered=false,log=[],roundTitle='';
+function buildMenu(){
+  $('modeCards').innerHTML=MODES.map((m,i)=>`<div class="mode" onclick="start(${i})"><h3>${m.icon} ${m.name}</h3><p>${m.desc}</p></div>`).join('');
+}
+function start(i){
+  const m=MODES[i]; roundTitle=m.name;
+  deck=[]; const gens=m.gen;
+  for(let k=0;k<m.count;k++) deck.push(pick(gens)());
+  idx=0;score=0;streak=0;best=0;log=[];
+  $('menu').style.display='none';$('results').style.display='none';$('game').style.display='block';
+  $('roundName').textContent=m.name; show();
+}
+function menu(){$('game').style.display='none';$('results').style.display='none';$('menu').style.display='block'}
+function show(){
+  const c=deck[idx]; answered=false; $('fb').className='feedback'; $('nextBtn').disabled=true; $('nextBtn').textContent='Next ▶';
+  $('caseNo').textContent=(idx+1)+' / '+deck.length; $('score').textContent=score; $('streak').textContent=streak;
+  $('bar').style.width=(idx/deck.length*100)+'%';
+  $('prompt').innerHTML=c.prompt; $('stage').innerHTML=c.stage||'';
+  if(c.type==='num'){
+    $('answerArea').innerHTML=`<div class="numin"><input id="numAns" type="number" step="any" placeholder="Your answer" onkeydown="if(event.key==='Enter')checkNum()"> ${c.unit||''} <button class="btn" onclick="checkNum()">Check</button></div><div class="hint">${c.hint||''}</div>`;
+    setTimeout(()=>$('numAns').focus(),50);
+  } else {
+    $('answerArea').innerHTML='<div class="opts">'+c.opts.map((op,i)=>`<div class="opt" onclick="answerMC(${i})"><span class="lbl">${'ABCD'[i]}</span>${op.html}</div>`).join('')+'</div>';
+  }
+}
+function grade(ok,mineTxt,correctTxt,why){
+  answered=true; const c=deck[idx];
+  if(ok){score+=1+(streak>=3?1:0);streak++;best=Math.max(best,streak);
+    $('fb').className='feedback ok';$('fb').innerHTML='✅ <b>Correct.</b> '+why+(streak>=3?' <em>Streak bonus +1!</em>':'');}
+  else{streak=0;$('fb').className='feedback bad';$('fb').innerHTML='❌ <b>Not quite.</b> The answer is <b>'+correctTxt+'</b>. '+why;}
+  log.push({q:c.prompt,correct:correctTxt,mine:mineTxt,ok});
+  $('score').textContent=score;$('streak').textContent=streak;
+  $('nextBtn').disabled=false;$('nextBtn').textContent=idx+1>=deck.length?'Finish ▶':'Next ▶';
+}
+function checkNum(){
+  if(answered)return; const c=deck[idx]; const v=parseFloat($('numAns').value);
+  if(isNaN(v)){$('fb').className='feedback bad';$('fb').innerHTML='Type a number first.';return}
+  const ok=Math.abs(v-c.answer)<=(c.tol!==undefined?c.tol:0.011);
+  grade(ok,fmt(v),fmt(c.answer),c.why);
+}
+function answerMC(i){
+  if(answered)return; const c=deck[idx];
+  const els=[...document.querySelectorAll('.opt')];
+  els[i].classList.add(c.opts[i].ok?'right':'wrong');
+  els[c.opts.findIndex(o=>o.ok)].classList.add('right');
+  grade(c.opts[i].ok, c.opts[i].html.replace(/<[^>]+>/g,''), c.opts.find(o=>o.ok).html.replace(/<[^>]+>/g,''), c.why);
+}
+function next(){idx++; if(idx>=deck.length){finish();return} show()}
+function finish(){
+  $('game').style.display='none';$('results').style.display='block';
+  const n=deck.length,right=log.filter(l=>l.ok).length,p=right/n;
+  $('badge').textContent=p>=.9?'🏆':p>=.7?'🥈':p>=.5?'🥉':'📘';
+  $('summary').innerHTML=`<b>${roundTitle}</b>: you solved <b>${right}</b> of ${n} (score ${score}, best streak ${best}). `+(p>=.9?'Excellent!':p>=.7?'Good. Check the review below.':'Keep practising: read the worked answers below, then play again.');
+  $('review').querySelector('tbody').innerHTML=log.map((l,i)=>`<tr><td>${i+1}. ${l.q.replace(/<[^>]+>/g,'').slice(0,90)}…</td><td>${l.correct}</td><td style="color:${l.ok?'#1f9d55':'#d64545'}">${l.ok?'✔':'✘'} ${l.mine}</td></tr>`).join('');
+}
+buildMenu();
+</script>
+</body>
+</html>

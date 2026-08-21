@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QUA107 · Chapter 3 · Position Hunter</title>
+<style>
+  @font-face{font-family:'SaudiRiyal';src:url(data:font/woff2;base64,d09GMgABAAAAAALQAA0AAAAABmAAAAJ8AAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP0ZGVE0cBmAAgkIIBBEICoFkgV4LCgABNgIkAxAEIAWEEAcqG2sFII7RS88cU5STILSS4qFvjPZnd860iVlEzJpYwjMh8YiUTIsk9dBOfHC/9vZR7+OS2G6oe1PNYtZcG1UbGepdnMqJRTj3AJ5FY9IAWgKhiIR0DlyzXIEKVaimFaxBzV0T+RGsse4hpRCTEPDx7aMa4OvPoMk4KXhL5vMY1UB5WY7wil40PlkLgaKhBUABgAsPAvLRij/+VKpxllpFuEEAYBRBRcUgAvbQEhikbRSkFPizq/H1u30IEI2sryggfgshfVNFTx8rLSB2NQSQoBmJNXAYQDuWCaBkNk4Y6XTktbJn66O7M6vZ83ezSbxW6/iVzez5jTxCeJLW5XmBbCPHw3SOjRmM/aS3ybfKobiYoLQuJ4d9mS3vxTZN5kOO0ZFJEq+07kG3XgPntIZf9fzh+Y8wzef6vKPRKbX7JysP29JgDtzada0fVbRLsLJnT0/b//VdXZ13HKYlGNjVkqA6hFzTjS0WI8JbgyB4PZu6cdPM/a/ZqP4asvyY8r8A0KyAoI5rXKVmLVA/CQBA5nO2QD6HfC4bQZojgIIQOEAJoNMbBKCPPQJCizsIKJq8QEA15U2A1BKtAjToik0Q0KglbtAS2YJ1YCH0ioSi00OoTumE1OsfGgyH9ec06g1/fqpUa1GrRJFi9SixPBIUx3AO5KgctQoUq4Cvgap5kpe0nMqpLSiuAK6qVK9EvXIF8nG4+niyKc7nwCUFijQoVyjgGjQHOKaqK1XVaxUFhAZTYihXVDEjcnPOFDgFWBa7OYmiobaogHIlo64UAMna3FnBFYg9QUWuObXqlEDTKZbhakpMwBLNZEytZMmTwscLsHtoHQQAgDxlyT4H) format('woff2')}
+  :root{--blue:#008DC3;--blue-dark:#0075A3;--grey:#748995;--cream:#E3E0D2;--ink:#1d2731;--ok:#1f9d55;--bad:#d64545;--card:#ffffff}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--cream);color:var(--ink);line-height:1.4}
+  header{background:var(--blue);color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  header h1{margin:0;font-size:1.25rem;letter-spacing:.2px}
+  header .sub{font-size:.85rem;opacity:.9}
+  header a{color:inherit}
+  .sar{font-family:'SaudiRiyal',sans-serif;font-style:normal}
+  .wrap{max-width:1000px;margin:0 auto;padding:18px}
+  .hud{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+  .stat{background:var(--card);border-radius:12px;padding:10px 14px;min-width:110px;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+  .stat .lbl{font-size:.72rem;color:var(--grey);text-transform:uppercase;letter-spacing:.06em}
+  .stat .val{font-size:1.4rem;font-weight:700;color:var(--blue-dark)}
+  .panel{background:var(--card);border-radius:16px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.08);margin-bottom:16px}
+  .btn{background:var(--blue);color:#fff;border:0;border-radius:999px;padding:10px 20px;font-size:1rem;cursor:pointer;font-weight:600}
+  .btn:hover{background:var(--blue-dark)}
+  .btn.ghost{background:transparent;color:var(--blue-dark);border:2px solid var(--blue)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+  .mode{border:2px solid #e2e6ea;border-radius:14px;padding:16px;cursor:pointer;transition:.15s;background:#fff}
+  .mode:hover{border-color:var(--blue);transform:translateY(-2px)}
+  .mode h3{margin:0 0 6px;color:var(--blue-dark)}
+  .mode p{margin:0;font-size:.92rem;color:#445}
+  .hint{font-size:.9rem;color:var(--grey)}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+  table{border-collapse:collapse;font-size:.95rem;margin:8px 0}
+  th,td{border:1px solid #e2e6ea;padding:6px 10px;text-align:center}
+  th{background:#eef5f8;color:var(--blue-dark)}
+  .prompt{font-size:1.06rem;margin:0 0 10px}
+  .data{font-family:Consolas,Menlo,monospace;background:#f4f6f2;border:1px solid #e2e6ea;border-radius:10px;padding:10px 12px;font-size:1.05rem;letter-spacing:.03em;display:inline-block;margin:4px 0 10px}
+  .opts{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
+  .opt{border:2px solid #e2e6ea;border-radius:12px;padding:10px 12px;cursor:pointer;background:#fff;font-size:1rem;text-align:left}
+  .opt .lbl{display:inline-block;background:#eef5f8;color:var(--blue-dark);font-weight:700;border-radius:6px;padding:1px 8px;margin-right:8px}
+  .opt:hover{border-color:var(--blue)}
+  .opt.right{border-color:var(--ok);background:#f0faf4}
+  .opt.wrong{border-color:var(--bad);background:#fdf3f3}
+  .numin{display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap}
+  .numin input{font-size:1.15rem;padding:9px 12px;border:2px solid #cfd8de;border-radius:10px;width:170px}
+  .numin input:focus{outline:none;border-color:var(--blue)}
+  .feedback{display:none;border-radius:12px;padding:12px 14px;margin-top:12px;font-size:.98rem}
+  .feedback.ok{display:block;background:#f0faf4;border:1px solid var(--ok)}
+  .feedback.bad{display:block;background:#fdf3f3;border:1px solid var(--bad)}
+  .barwrap{height:8px;background:#dfe5e9;border-radius:99px;margin:10px 0 16px;overflow:hidden}
+  #bar{height:100%;width:0;background:var(--blue);transition:width .3s}
+  #results .badge{font-size:3rem}
+  #review td:first-child{text-align:left}
+  footer{text-align:center;color:var(--grey);font-size:.8rem;padding:14px}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>🗺️ Position Hunter</h1><div class="sub">QUA 107 · Chapter 3 · Measures of position (LO 3.3)</div></div>
+  <div class="sub" style="text-align:right">King Saud University · College of Business Administration<br><a href="../../../index.html">QUA 107 course page</a> · <a href="../slides.html">Chapter 3 slides</a></div>
+</header>
+<div class="wrap">
+  <div id="menu">
+    <div class="panel"><p class="prompt"><b>Choose a round.</b> Every play generates new numbers, so you can practise as often as you like. Rounds cover the location formula, whole-number and interpolated percentiles, five-number summaries and interpretation.</p>
+      <div class="modes" id="modeCards"></div>
+    </div>
+  </div>
+  <div id="game" style="display:none">
+    <div class="hud">
+      <div class="stat"><div class="lbl">Question</div><div class="val" id="caseNo">1</div></div>
+      <div class="stat"><div class="lbl">Score</div><div class="val" id="score">0</div></div>
+      <div class="stat"><div class="lbl">Streak</div><div class="val" id="streak">0</div></div>
+      <div class="stat" style="flex:1"><div class="lbl">Round</div><div class="val" id="roundName" style="font-size:1.05rem;padding-top:6px"></div></div>
+    </div>
+    <div class="barwrap"><div id="bar"></div></div>
+    <div class="panel">
+      <p class="prompt" id="prompt"></p>
+      <div id="stage"></div>
+      <div id="answerArea"></div>
+      <div class="feedback" id="fb"></div>
+      <div class="row" style="margin-top:14px">
+        <button class="btn ghost" onclick="menu()">◀ Rounds</button>
+        <button class="btn" id="nextBtn" onclick="next()" disabled>Next ▶</button>
+      </div>
+    </div>
+  </div>
+  <div id="results" style="display:none">
+    <div class="panel" style="text-align:center">
+      <div class="badge" id="badge"></div>
+      <p class="prompt" id="summary"></p>
+      <button class="btn" onclick="menu()">Play another round</button>
+    </div>
+    <div class="panel"><b>Review</b>
+      <table id="review" style="width:100%"><thead><tr><th>Question</th><th>Correct answer</th><th>Your answer</th></tr></thead><tbody></tbody></table>
+    </div>
+  </div>
+</div>
+<footer>QUA 107 · Introduction to Business Statistics · Practice game (not graded).</footer>
+<script>
+const $=id=>document.getElementById(id);
+const RY='<span class="sar">ê</span>';
+function ri(a,b){return a+Math.floor(Math.random()*(b-a+1))}
+function pick(a){return a[Math.floor(Math.random()*a.length)]}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function sampleDistinct(n,lo,hi){const s=new Set();while(s.size<n)s.add(ri(lo,hi));return [...s]}
+function fmt(x){return Math.abs(x-Math.round(x))<1e-9?String(Math.round(x)):x.toFixed(2).replace(/0$/,'').replace(/\.$/,'')}
+function mean(a){return a.reduce((s,v)=>s+v,0)/a.length}
+function median(a){const s=a.slice().sort((x,y)=>x-y),n=s.length;return n%2?s[(n-1)/2]:(s[n/2-1]+s[n/2])/2}
+function dataBox(a){return '<div class="data">'+a.join(', ')+'</div>'}
+function sortedTable(a){let h='<tr><th>Position</th>'+a.map((_,i)=>'<th>'+(i+1)+'</th>').join('')+'</tr>';let r='<tr><td><b>Value</b></td>'+a.map(v=>'<td>'+v+'</td>').join('')+'</tr>';return '<table>'+h+r+'</table>'}
+
+const CTXS=[['cups sold per hour at one branch of The Coffee Address','cups'],
+ ['laptops sold per day at a Jarir branch','laptops'],
+ ['customers served per hour at a bank branch','customers'],
+ ['orders delivered per day by a Jahez driver','orders'],
+ ['meals sold per hour at an Al Baik branch','meals'],
+ ['rooms occupied per night at a hotel in AlUla','rooms'],
+ ['calls answered per hour at a stc call centre','calls'],
+ ['cars serviced per day at a garage in Dammam','cars']];
+function gLp(){
+  const [c,u]=pick(CTXS); const n=pick([9,11,14,15,19,20,24,29,39]); const p=pick([10,20,25,30,40,50,60,70,75,80,90]);
+  const L=(n+1)*p/100;
+  return {type:'num',prompt:`<b>Locate It.</b> A sorted data set of <b>${c}</b> has <b>n = ${n}</b> values.<br>At which LOCATION is the <b>${p}th percentile</b>? (L = (n + 1) · p/100)`,
+    answer:+L.toFixed(2),tol:0.011,unit:'(position)',hint:'Use n + 1, not n. The result is a position, not a value.',
+    why:`L = (${n} + 1) × ${p}/100 = ${fmt(L)}.`};
+}
+function gWhole(){
+  const combos=[[15,[25,50,75]],[19,[25,50,75]],[7,[25,50,75]],[11,[25,50,75]],[9,[10,50,90]]];
+  const [n,ps]=pick(combos); const p=pick(ps);
+  const a=sampleDistinct(n,40,400).sort((x,y)=>x-y);
+  const L=(n+1)*p/100; const ans=a[L-1];
+  const lab={25:'first quartile Q1',50:'median',75:'third quartile Q3',10:'first decile D1',90:'ninth decile D9'}[p];
+  return {type:'num',prompt:`<b>Whole Number.</b> The sorted values of <b>${pick(CTXS)[0]}</b> (n = ${n}):`,
+    stage:sortedTable(a)+`<p class="prompt">Find the <b>${lab}</b>.</p>`,
+    answer:ans,unit:'',hint:'L = (n + 1) · p/100 is a whole number here: take the VALUE at that position.',
+    why:`L = (${n} + 1) × ${p}/100 = ${L}: the ${L}th sorted value is ${ans}.`};
+}
+function gInterp(){
+  const combos=[[6,[25,50,75]],[10,[25,50,75]],[8,[25,50,75]],[12,[25,50,75]]];
+  const [n,ps]=pick(combos); const p=pick(ps);
+  const a=sampleDistinct(n,20,300).sort((x,y)=>x-y);
+  const L=(n+1)*p/100; const base=Math.floor(L); const frac=+(L-base).toFixed(2);
+  const ans=a[base-1]+frac*(a[base]-a[base-1]);
+  const lab={25:'Q1',50:'the median',75:'Q3'}[p];
+  return {type:'num',prompt:`<b>Interpolate.</b> The sorted values of <b>${pick(CTXS)[0]}</b> (n = ${n}):`,
+    stage:sortedTable(a)+`<p class="prompt">Find <b>${lab}</b> (interpolate; 2 decimals).</p>`,
+    answer:+ans.toFixed(2),tol:0.02,unit:'',hint:'Value at the integer position + decimal part × (next value − value).',
+    why:`L = ${fmt(L)}: start at position ${base} (${a[base-1]}), go ${frac} of the way to position ${base+1} (${a[base]}): ${a[base-1]} + ${frac} × ${a[base]-a[base-1]} = ${fmt(ans)}.`};
+}
+function gFive(){
+  const n=15; const a=sampleDistinct(n,100,900).sort((x,y)=>x-y);
+  const q1=a[3],q2=a[7],q3=a[11];
+  const kind=pick(['pick','above','target']);
+  if(kind==='pick'){
+    const opts=shuffle([{html:`Min ${a[0]}, Q1 ${q1}, median ${q2}, Q3 ${q3}, max ${a[14]}`,ok:true},
+      {html:`Min ${a[0]}, Q1 ${a[2]}, median ${q2}, Q3 ${a[12]}, max ${a[14]}`,ok:false},
+      {html:`Min ${a[0]}, Q1 ${q1}, median ${fmt(mean(a))}, Q3 ${q3}, max ${a[14]}`,ok:false},
+      {html:`Q1 ${q1}, Q2 ${q2}, Q3 ${q3}, Q4 ${a[14]}, Q5 ${a[0]}`,ok:false}]);
+    return {type:'mc',prompt:`<b>Five Numbers.</b> Sorted values (n = 15):`,stage:sortedTable(a),
+      opts,why:'With n = 15, (n + 1) = 16: Q1 at position 4, the median at 8, Q3 at 12; add the minimum and the maximum.'};}
+  if(kind==='above'){
+    return {type:'num',prompt:`<b>Five Numbers.</b> For these 15 sorted values, Q3 = ${q3}:`,
+      stage:sortedTable(a)+`<p class="prompt">About what <b>percent</b> of values are GREATER than ${q3}?</p>`,
+      answer:25,tol:0.5,unit:'%',hint:'Q3 has 75% below it.',why:'75% of values lie below Q3, so about 25% lie above it.'};}
+  return {type:'num',prompt:`<b>Five Numbers.</b> A new branch wants to be in the <b>top 25%</b> of these 15 branches:`,
+    stage:sortedTable(a)+`<p class="prompt">Which value must it beat (the third quartile)?</p>`,
+    answer:q3,unit:'',hint:'Top 25% = above Q3, at position 12 of 15.',
+    why:`Q3 is at position (15 + 1) × 75/100 = 12: ${q3}.`};
+}
+function gSay(){
+  const S=[['A test score is at the 90th percentile of all applicants.','About 90% of applicants scored below it',['The applicant answered 90% correctly','About 90% scored above it','The score equals 90']],
+   ['A branch is at the 50th percentile of monthly sales.','Its sales equal the median: half sell more, half less',['It sells 50% of the company total','Its sales equal the mean','It is in the top quartile']],
+   ['A fund is at the 75th percentile of similar funds.','It beat about 75% of similar funds: it is at Q3',['It returned 75% in total','About 75% of funds beat it','It is exactly average']],
+   ['Q1 of delivery times is 22 minutes.','About 25% of deliveries take less than 22 minutes',['About 25% take more than 22 minutes','The fastest delivery is 22 minutes','The mean is 22 minutes']],
+   ['D9 of branch revenues is 310,000 riyals.','About 90% of branches earn less than 310,000',['About 90% earn more than that','Exactly 9 branches earn less','The top branch earns 310,000']],
+   ['A baby\'s weight is at the 15th percentile for its age.','About 85% of babies that age weigh more',['About 85% weigh less','It weighs 15% below the maximum','The weight must be unhealthy']],
+   ['An employee moved from the 60th to the 75th percentile of salaries.','The salary now exceeds a larger share of colleagues than before',['The employee got exactly a 15% raise','The salary fell relative to colleagues','The employee now earns Q1']],
+   ['The 95th percentile of daily demand sets the safety stock.','On about 95% of days, demand will not exceed the stock',['Demand exceeds the stock on 95% of days','The stock is exactly 95 units','The mean demand equals the stock']]];
+  const [d,c,w]=pick(S);
+  const opts=shuffle([{html:c,ok:true}].concat(w.map(x=>({html:x,ok:false}))));
+  return {type:'mc',prompt:`<b>Say It Right.</b> ${d}<br>What does this mean?`,opts,
+    why:'A percentile is an address in the ordered data: being at the pth percentile means about p% of the values are below you.'};
+}
+const MODES=[
+ {name:'Locate It',icon:'📍',desc:'The location formula L = (n + 1) · p/100, again and again.',count:8,gen:[gLp]},
+ {name:'Whole Number',icon:'🔢',desc:'When L is whole: read the value straight from the sorted list.',count:8,gen:[gWhole]},
+ {name:'Interpolate',icon:'✂️',desc:'When L is 3.5: split the gap between two values.',count:8,gen:[gInterp]},
+ {name:'Five Numbers',icon:'🖐️',desc:'Min, Q1, median, Q3, max, and what they mean for targets.',count:8,gen:[gFive]},
+ {name:'Say It Right',icon:'💬',desc:'Interpret percentiles like a professional (not like a rumour).',count:8,gen:[gSay]},
+ {name:'Full Challenge',icon:'🏆',desc:'Fifteen mixed questions from all the rounds.',count:15,gen:[gLp,gWhole,gInterp,gFive,gSay]},
+];
+
+// ---------------- engine ----------------
+let deck=[],idx=0,score=0,streak=0,best=0,answered=false,log=[],roundTitle='';
+function buildMenu(){
+  $('modeCards').innerHTML=MODES.map((m,i)=>`<div class="mode" onclick="start(${i})"><h3>${m.icon} ${m.name}</h3><p>${m.desc}</p></div>`).join('');
+}
+function start(i){
+  const m=MODES[i]; roundTitle=m.name;
+  deck=[]; const gens=m.gen;
+  for(let k=0;k<m.count;k++) deck.push(pick(gens)());
+  idx=0;score=0;streak=0;best=0;log=[];
+  $('menu').style.display='none';$('results').style.display='none';$('game').style.display='block';
+  $('roundName').textContent=m.name; show();
+}
+function menu(){$('game').style.display='none';$('results').style.display='none';$('menu').style.display='block'}
+function show(){
+  const c=deck[idx]; answered=false; $('fb').className='feedback'; $('nextBtn').disabled=true; $('nextBtn').textContent='Next ▶';
+  $('caseNo').textContent=(idx+1)+' / '+deck.length; $('score').textContent=score; $('streak').textContent=streak;
+  $('bar').style.width=(idx/deck.length*100)+'%';
+  $('prompt').innerHTML=c.prompt; $('stage').innerHTML=c.stage||'';
+  if(c.type==='num'){
+    $('answerArea').innerHTML=`<div class="numin"><input id="numAns" type="number" step="any" placeholder="Your answer" onkeydown="if(event.key==='Enter')checkNum()"> ${c.unit||''} <button class="btn" onclick="checkNum()">Check</button></div><div class="hint">${c.hint||''}</div>`;
+    setTimeout(()=>$('numAns').focus(),50);
+  } else {
+    $('answerArea').innerHTML='<div class="opts">'+c.opts.map((op,i)=>`<div class="opt" onclick="answerMC(${i})"><span class="lbl">${'ABCD'[i]}</span>${op.html}</div>`).join('')+'</div>';
+  }
+}
+function grade(ok,mineTxt,correctTxt,why){
+  answered=true; const c=deck[idx];
+  if(ok){score+=1+(streak>=3?1:0);streak++;best=Math.max(best,streak);
+    $('fb').className='feedback ok';$('fb').innerHTML='✅ <b>Correct.</b> '+why+(streak>=3?' <em>Streak bonus +1!</em>':'');}
+  else{streak=0;$('fb').className='feedback bad';$('fb').innerHTML='❌ <b>Not quite.</b> The answer is <b>'+correctTxt+'</b>. '+why;}
+  log.push({q:c.prompt,correct:correctTxt,mine:mineTxt,ok});
+  $('score').textContent=score;$('streak').textContent=streak;
+  $('nextBtn').disabled=false;$('nextBtn').textContent=idx+1>=deck.length?'Finish ▶':'Next ▶';
+}
+function checkNum(){
+  if(answered)return; const c=deck[idx]; const v=parseFloat($('numAns').value);
+  if(isNaN(v)){$('fb').className='feedback bad';$('fb').innerHTML='Type a number first.';return}
+  const ok=Math.abs(v-c.answer)<=(c.tol!==undefined?c.tol:0.011);
+  grade(ok,fmt(v),fmt(c.answer),c.why);
+}
+function answerMC(i){
+  if(answered)return; const c=deck[idx];
+  const els=[...document.querySelectorAll('.opt')];
+  els[i].classList.add(c.opts[i].ok?'right':'wrong');
+  els[c.opts.findIndex(o=>o.ok)].classList.add('right');
+  grade(c.opts[i].ok, c.opts[i].html.replace(/<[^>]+>/g,''), c.opts.find(o=>o.ok).html.replace(/<[^>]+>/g,''), c.why);
+}
+function next(){idx++; if(idx>=deck.length){finish();return} show()}
+function finish(){
+  $('game').style.display='none';$('results').style.display='block';
+  const n=deck.length,right=log.filter(l=>l.ok).length,p=right/n;
+  $('badge').textContent=p>=.9?'🏆':p>=.7?'🥈':p>=.5?'🥉':'📘';
+  $('summary').innerHTML=`<b>${roundTitle}</b>: you solved <b>${right}</b> of ${n} (score ${score}, best streak ${best}). `+(p>=.9?'Excellent!':p>=.7?'Good. Check the review below.':'Keep practising: read the worked answers below, then play again.');
+  $('review').querySelector('tbody').innerHTML=log.map((l,i)=>`<tr><td>${i+1}. ${l.q.replace(/<[^>]+>/g,'').slice(0,90)}…</td><td>${l.correct}</td><td style="color:${l.ok?'#1f9d55':'#d64545'}">${l.ok?'✔':'✘'} ${l.mine}</td></tr>`).join('');
+}
+buildMenu();
+</script>
+</body>
+</html>

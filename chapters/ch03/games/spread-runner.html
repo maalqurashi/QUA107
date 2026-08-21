@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QUA107 · Chapter 3 · Spread Runner</title>
+<style>
+  @font-face{font-family:'SaudiRiyal';src:url(data:font/woff2;base64,d09GMgABAAAAAALQAA0AAAAABmAAAAJ8AAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP0ZGVE0cBmAAgkIIBBEICoFkgV4LCgABNgIkAxAEIAWEEAcqG2sFII7RS88cU5STILSS4qFvjPZnd860iVlEzJpYwjMh8YiUTIsk9dBOfHC/9vZR7+OS2G6oe1PNYtZcG1UbGepdnMqJRTj3AJ5FY9IAWgKhiIR0DlyzXIEKVaimFaxBzV0T+RGsse4hpRCTEPDx7aMa4OvPoMk4KXhL5vMY1UB5WY7wil40PlkLgaKhBUABgAsPAvLRij/+VKpxllpFuEEAYBRBRcUgAvbQEhikbRSkFPizq/H1u30IEI2sryggfgshfVNFTx8rLSB2NQSQoBmJNXAYQDuWCaBkNk4Y6XTktbJn66O7M6vZ83ezSbxW6/iVzez5jTxCeJLW5XmBbCPHw3SOjRmM/aS3ybfKobiYoLQuJ4d9mS3vxTZN5kOO0ZFJEq+07kG3XgPntIZf9fzh+Y8wzef6vKPRKbX7JysP29JgDtzada0fVbRLsLJnT0/b//VdXZ13HKYlGNjVkqA6hFzTjS0WI8JbgyB4PZu6cdPM/a/ZqP4asvyY8r8A0KyAoI5rXKVmLVA/CQBA5nO2QD6HfC4bQZojgIIQOEAJoNMbBKCPPQJCizsIKJq8QEA15U2A1BKtAjToik0Q0KglbtAS2YJ1YCH0ioSi00OoTumE1OsfGgyH9ec06g1/fqpUa1GrRJFi9SixPBIUx3AO5KgctQoUq4Cvgap5kpe0nMqpLSiuAK6qVK9EvXIF8nG4+niyKc7nwCUFijQoVyjgGjQHOKaqK1XVaxUFhAZTYihXVDEjcnPOFDgFWBa7OYmiobaogHIlo64UAMna3FnBFYg9QUWuObXqlEDTKZbhakpMwBLNZEytZMmTwscLsHtoHQQAgDxlyT4H) format('woff2')}
+  :root{--blue:#008DC3;--blue-dark:#0075A3;--grey:#748995;--cream:#E3E0D2;--ink:#1d2731;--ok:#1f9d55;--bad:#d64545;--card:#ffffff}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--cream);color:var(--ink);line-height:1.4}
+  header{background:var(--blue);color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  header h1{margin:0;font-size:1.25rem;letter-spacing:.2px}
+  header .sub{font-size:.85rem;opacity:.9}
+  header a{color:inherit}
+  .sar{font-family:'SaudiRiyal',sans-serif;font-style:normal}
+  .wrap{max-width:1000px;margin:0 auto;padding:18px}
+  .hud{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+  .stat{background:var(--card);border-radius:12px;padding:10px 14px;min-width:110px;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+  .stat .lbl{font-size:.72rem;color:var(--grey);text-transform:uppercase;letter-spacing:.06em}
+  .stat .val{font-size:1.4rem;font-weight:700;color:var(--blue-dark)}
+  .panel{background:var(--card);border-radius:16px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.08);margin-bottom:16px}
+  .btn{background:var(--blue);color:#fff;border:0;border-radius:999px;padding:10px 20px;font-size:1rem;cursor:pointer;font-weight:600}
+  .btn:hover{background:var(--blue-dark)}
+  .btn.ghost{background:transparent;color:var(--blue-dark);border:2px solid var(--blue)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+  .mode{border:2px solid #e2e6ea;border-radius:14px;padding:16px;cursor:pointer;transition:.15s;background:#fff}
+  .mode:hover{border-color:var(--blue);transform:translateY(-2px)}
+  .mode h3{margin:0 0 6px;color:var(--blue-dark)}
+  .mode p{margin:0;font-size:.92rem;color:#445}
+  .hint{font-size:.9rem;color:var(--grey)}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+  table{border-collapse:collapse;font-size:.95rem;margin:8px 0}
+  th,td{border:1px solid #e2e6ea;padding:6px 10px;text-align:center}
+  th{background:#eef5f8;color:var(--blue-dark)}
+  .prompt{font-size:1.06rem;margin:0 0 10px}
+  .data{font-family:Consolas,Menlo,monospace;background:#f4f6f2;border:1px solid #e2e6ea;border-radius:10px;padding:10px 12px;font-size:1.05rem;letter-spacing:.03em;display:inline-block;margin:4px 0 10px}
+  .opts{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
+  .opt{border:2px solid #e2e6ea;border-radius:12px;padding:10px 12px;cursor:pointer;background:#fff;font-size:1rem;text-align:left}
+  .opt .lbl{display:inline-block;background:#eef5f8;color:var(--blue-dark);font-weight:700;border-radius:6px;padding:1px 8px;margin-right:8px}
+  .opt:hover{border-color:var(--blue)}
+  .opt.right{border-color:var(--ok);background:#f0faf4}
+  .opt.wrong{border-color:var(--bad);background:#fdf3f3}
+  .numin{display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap}
+  .numin input{font-size:1.15rem;padding:9px 12px;border:2px solid #cfd8de;border-radius:10px;width:170px}
+  .numin input:focus{outline:none;border-color:var(--blue)}
+  .feedback{display:none;border-radius:12px;padding:12px 14px;margin-top:12px;font-size:.98rem}
+  .feedback.ok{display:block;background:#f0faf4;border:1px solid var(--ok)}
+  .feedback.bad{display:block;background:#fdf3f3;border:1px solid var(--bad)}
+  .barwrap{height:8px;background:#dfe5e9;border-radius:99px;margin:10px 0 16px;overflow:hidden}
+  #bar{height:100%;width:0;background:var(--blue);transition:width .3s}
+  #results .badge{font-size:3rem}
+  #review td:first-child{text-align:left}
+  footer{text-align:center;color:var(--grey);font-size:.8rem;padding:14px}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>🏃 Spread Runner</h1><div class="sub">QUA 107 · Chapter 3 · Measures of dispersion (LO 3.2)</div></div>
+  <div class="sub" style="text-align:right">King Saud University · College of Business Administration<br><a href="../../../index.html">QUA 107 course page</a> · <a href="../slides.html">Chapter 3 slides</a></div>
+</header>
+<div class="wrap">
+  <div id="menu">
+    <div class="panel"><p class="prompt"><b>Choose a round.</b> Every play generates new numbers, so you can practise as often as you like. Rounds cover the range, variance and standard deviation, comparing branches, Chebyshev's theorem and the Empirical Rule.</p>
+      <div class="modes" id="modeCards"></div>
+    </div>
+  </div>
+  <div id="game" style="display:none">
+    <div class="hud">
+      <div class="stat"><div class="lbl">Question</div><div class="val" id="caseNo">1</div></div>
+      <div class="stat"><div class="lbl">Score</div><div class="val" id="score">0</div></div>
+      <div class="stat"><div class="lbl">Streak</div><div class="val" id="streak">0</div></div>
+      <div class="stat" style="flex:1"><div class="lbl">Round</div><div class="val" id="roundName" style="font-size:1.05rem;padding-top:6px"></div></div>
+    </div>
+    <div class="barwrap"><div id="bar"></div></div>
+    <div class="panel">
+      <p class="prompt" id="prompt"></p>
+      <div id="stage"></div>
+      <div id="answerArea"></div>
+      <div class="feedback" id="fb"></div>
+      <div class="row" style="margin-top:14px">
+        <button class="btn ghost" onclick="menu()">◀ Rounds</button>
+        <button class="btn" id="nextBtn" onclick="next()" disabled>Next ▶</button>
+      </div>
+    </div>
+  </div>
+  <div id="results" style="display:none">
+    <div class="panel" style="text-align:center">
+      <div class="badge" id="badge"></div>
+      <p class="prompt" id="summary"></p>
+      <button class="btn" onclick="menu()">Play another round</button>
+    </div>
+    <div class="panel"><b>Review</b>
+      <table id="review" style="width:100%"><thead><tr><th>Question</th><th>Correct answer</th><th>Your answer</th></tr></thead><tbody></tbody></table>
+    </div>
+  </div>
+</div>
+<footer>QUA 107 · Introduction to Business Statistics · Practice game (not graded).</footer>
+<script>
+const $=id=>document.getElementById(id);
+const RY='<span class="sar">ê</span>';
+function ri(a,b){return a+Math.floor(Math.random()*(b-a+1))}
+function pick(a){return a[Math.floor(Math.random()*a.length)]}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function sampleDistinct(n,lo,hi){const s=new Set();while(s.size<n)s.add(ri(lo,hi));return [...s]}
+function fmt(x){return Math.abs(x-Math.round(x))<1e-9?String(Math.round(x)):x.toFixed(2).replace(/0$/,'').replace(/\.$/,'')}
+function mean(a){return a.reduce((s,v)=>s+v,0)/a.length}
+function median(a){const s=a.slice().sort((x,y)=>x-y),n=s.length;return n%2?s[(n-1)/2]:(s[n/2-1]+s[n/2])/2}
+function dataBox(a){return '<div class="data">'+a.join(', ')+'</div>'}
+function sortedTable(a){let h='<tr><th>Position</th>'+a.map((_,i)=>'<th>'+(i+1)+'</th>').join('')+'</tr>';let r='<tr><td><b>Value</b></td>'+a.map(v=>'<td>'+v+'</td>').join('')+'</tr>';return '<table>'+h+r+'</table>'}
+
+const CTXS=[['cups sold per hour at one branch of The Coffee Address','cups'],
+ ['laptops sold per day at a Jarir branch','laptops'],
+ ['customers served per hour at a bank branch','customers'],
+ ['orders delivered per day by a Jahez driver','orders'],
+ ['meals sold per hour at an Al Baik branch','meals'],
+ ['rooms occupied per night at a hotel in AlUla','rooms'],
+ ['calls answered per hour at a stc call centre','calls'],
+ ['cars serviced per day at a garage in Dammam','cars']];
+const DEVSETS=[[-3,-1,0,1,3],[-4,-2,0,2,4],[-5,-1,0,1,5],[-2,-2,0,1,3],[-3,-3,1,2,3],[-4,-1,-1,2,4]];
+function gRange(){
+  const [c,u]=pick(CTXS); const a=sampleDistinct(pick([5,6,8]),8,95);
+  return {type:'num',prompt:`<b>Range Dash.</b> Values of <b>${c}</b>:`,stage:dataBox(a),
+    answer:Math.max(...a)-Math.min(...a),unit:u,hint:'Maximum − minimum.',
+    why:`Range = ${Math.max(...a)} − ${Math.min(...a)} = ${Math.max(...a)-Math.min(...a)}.`};
+}
+function gVar(pop){
+  const [c,u]=pick(CTXS); const devs=pick(DEVSETS); const m=pick([20,25,30,40,50]);
+  const a=shuffle(devs.map(d=>m+d)); const ss=devs.reduce((s,d)=>s+d*d,0); const N=devs.length;
+  const v=pop? ss/N : ss/(N-1);
+  return {type:'num',prompt:`<b>Variance Builder.</b> ${pop?'ALL '+N+' periods of interest (a population)':'A SAMPLE of '+N+' periods'} of <b>${c}</b>. The mean is ${m}:`,
+    stage:dataBox(a),answer:+v.toFixed(2),tol:0.02,unit:'',hint:pop?'Population: divide Σ(x − μ)² by N.':'Sample: divide Σ(x − x̄)² by n − 1.',
+    why:`Σ(deviation²) = ${ss}; divide by ${pop?N:N-1} (${pop?'population: N':'sample: n − 1'}): ${pop?'σ²':'s²'} = ${fmt(v)}.`};
+}
+function gSD(){
+  const [c,u]=pick(CTXS); const devs=pick(DEVSETS); const m=pick([20,30,45]);
+  const a=shuffle(devs.map(d=>m+d)); const ss=devs.reduce((s,d)=>s+d*d,0); const N=devs.length;
+  const pop=Math.random()<0.5; const sd=Math.sqrt(pop?ss/N:ss/(N-1));
+  return {type:'num',prompt:`<b>Variance Builder.</b> ${pop?'A population of '+N+' values':'A sample of '+N+' values'} of <b>${c}</b>, mean ${m}, Σ(deviation²) = ${ss}.<br>Compute the <b>standard deviation</b> (2 decimals):`,
+    stage:dataBox(a),answer:+sd.toFixed(2),tol:0.02,unit:u,hint:'Variance first, then the square root.',
+    why:`${pop?'σ²':'s²'} = ${ss}/${pop?N:N-1} = ${fmt(ss/(pop?N:N-1))}; the square root gives ${sd.toFixed(2)}.`};
+}
+function gCheb(){
+  const kind=pick(['pct','pct','k','interval']);
+  if(kind==='pct'){const k=pick([1.5,2,2.5,3,4,5]);const p=(1-1/(k*k))*100;
+    return {type:'num',prompt:`<b>Chebyshev Run.</b> Shape unknown. At least what <b>percent</b> of observations lie within <b>${k}</b> standard deviations of the mean? (1 decimal)`,
+      answer:+p.toFixed(1),tol:0.15,unit:'%',hint:'1 − 1/k², then × 100.',
+      why:`1 − 1/${k}² = 1 − ${(1/(k*k)).toFixed(3)} = ${(p/100).toFixed(3)} → at least ${p.toFixed(1)}%.`};}
+  if(kind==='k'){const pair=pick([[2,75],[2.5,84],[3,'88.9'],[5,96]]);
+    return {type:'num',prompt:`<b>Chebyshev Run.</b> A manager wants a guaranteed <b>${pair[1]}%</b> of observations (any shape). How many standard deviations (k) are needed?`,
+      answer:pair[0],tol:0.01,unit:'standard deviations',hint:'Solve 1 − 1/k² = the percent.',
+      why:`1 − 1/k² = ${pair[1]}% gives k² = ${(1/(1-parseFloat(pair[1])/100)).toFixed(2)}, so k = ${pair[0]}.`};}
+  const mu=pick([20000,30000,50000]); const sd=pick([2000,2500,5000]); const k=pick([2,2.5,3]);
+  const opts=shuffle([{html:`${RY} ${(mu-k*sd).toLocaleString()} to ${RY} ${(mu+k*sd).toLocaleString()}`,ok:true},
+    {html:`${RY} ${(mu-sd).toLocaleString()} to ${RY} ${(mu+sd).toLocaleString()}`,ok:false},
+    {html:`${RY} ${mu.toLocaleString()} to ${RY} ${(mu+k*sd).toLocaleString()}`,ok:false},
+    {html:`${RY} ${(mu-(k+1)*sd).toLocaleString()} to ${RY} ${(mu+(k+1)*sd).toLocaleString()}`,ok:false}]);
+  return {type:'mc',prompt:`<b>Chebyshev Run.</b> Daily sales: mean ${RY} ${mu.toLocaleString()}, standard deviation ${RY} ${sd.toLocaleString()}, shape unknown.<br>At least ${((1-1/(k*k))*100).toFixed(1)}% of days fall in which interval?`,
+    opts,why:`That percent corresponds to k = ${k}: mean ± ${k} × ${sd.toLocaleString()}.`};
+}
+function gEmp(){
+  const CT=[['exam scores','points',75,8],['monthly rents','riyals',2000,150],['delivery times','minutes',30,5],['box weights','kg',50,4],['daily sales','riyals',6000,400]];
+  const [c,u,mu,sd]=pick(CT); const kind=pick(['int','tail','unusual']);
+  if(kind==='int'){const pair=pick([[1,'68'],[2,'95'],[3,'99.7']]); const k=pair[0];
+    const opts=shuffle([{html:`${(mu-k*sd).toLocaleString()} to ${(mu+k*sd).toLocaleString()}`,ok:true},
+      {html:`${(mu-(k+1)*sd).toLocaleString()} to ${(mu+(k+1)*sd).toLocaleString()}`,ok:false},
+      {html:`${mu.toLocaleString()} to ${(mu+k*sd).toLocaleString()}`,ok:false},
+      {html:`${(mu-sd/2).toLocaleString()} to ${(mu+sd/2).toLocaleString()}`,ok:false}]);
+    return {type:'mc',prompt:`<b>Bell Curve.</b> The <b>${c}</b> are bell-shaped: mean ${mu.toLocaleString()}, standard deviation ${sd.toLocaleString()}.<br>About ${pair[1]}% of the values lie between:`,
+      opts,why:`${pair[1]}% ↔ mean ± ${k}σ = ${mu.toLocaleString()} ± ${k} × ${sd.toLocaleString()}.`};}
+  if(kind==='tail'){const k=pick([1,2,3]); const inside={1:68,2:95,3:99.7}[k]; const tail=+(((100-inside)/2).toFixed(2));
+    const side=pick(['above','below']); const b=side==='above'?mu+k*sd:mu-k*sd;
+    return {type:'num',prompt:`<b>Bell Curve.</b> The <b>${c}</b> are bell-shaped: mean ${mu.toLocaleString()}, standard deviation ${sd.toLocaleString()}.<br>About what <b>percent</b> of values are ${side} ${b.toLocaleString()}?`,
+      answer:tail,tol:0.15,unit:'%',hint:'100 − (inside share), split between the two tails.',
+      why:`${inside}% lie within ${k}σ; ${(100-inside).toFixed(1)}% outside; half on each side: ${tail}%.`};}
+  const k=pick([2.5,3,3.5]); const v=mu+k*sd;
+  const opts=shuffle([{html:`Unusually high: it is ${k} standard deviations above the mean`,ok:true},
+    {html:'Typical: within 1 standard deviation of the mean',ok:false},
+    {html:'Unusually low: below the mean',ok:false},
+    {html:'Impossible: no value can be that far from the mean',ok:false}]);
+  return {type:'mc',prompt:`<b>Bell Curve.</b> The <b>${c}</b> are bell-shaped: mean ${mu.toLocaleString()}, standard deviation ${sd.toLocaleString()}. One value equals <b>${v.toLocaleString()}</b>.<br>How should it be judged?`,
+    opts,why:`(${v.toLocaleString()} − ${mu.toLocaleString()}) / ${sd.toLocaleString()} = ${k}σ above the mean: beyond 2σ is already the rare top ~2.5%.`};
+}
+function gCompare(){
+  const m=pick([30,40,50]);
+  const tight=shuffle([-3,-2,-1,0,0,1,2,3].map(d=>m+d));
+  const wide=shuffle([-15,-9,-5,-2,2,5,9,15].map(d=>m+d));
+  const first=Math.random()<0.5;
+  const A=first?tight:wide, B=first?wide:tight;
+  const consistent=first?'Branch A':'Branch B';
+  const ask=pick(['sd','plan']);
+  const opts=shuffle([
+    {html:(consistent==='Branch A'?'Branch B':'Branch A')+(ask==='sd'?': its values are much more spread out':': a large spread means similar values'),ok:ask==='sd'},
+    {html:consistent+(ask==='sd'?': its values stay close to the mean':': a small spread means the values are similar every period'),ok:ask!=='sd'},
+    {html:'Both are the same because the means are equal',ok:false},
+    {html:'It cannot be determined from the data',ok:false}]);
+  return {type:'mc',prompt:`<b>Two Branches.</b> Both branches have a mean of ${m}.<br>Branch A: ${A.join(', ')}<br>Branch B: ${B.join(', ')}<br><b>${ask==='sd'?'Which branch has the LARGER standard deviation?':'Which branch is easier to plan for (more consistent)?'}</b>`,
+    opts,why:ask==='sd'?'The larger spread around the same mean means the larger standard deviation.':'Less dispersion = more consistent = easier planning; equal means say nothing about spread.'};
+}
+const MODES=[
+ {name:'Range Dash',icon:'📏',desc:'Maximum minus minimum, at speed.',count:8,gen:[gRange]},
+ {name:'Variance Builder',icon:'🧱',desc:'σ² and s² step by step (watch the N vs n − 1 trap), plus standard deviations.',count:8,gen:[()=>gVar(true),()=>gVar(false),gSD]},
+ {name:'Two Branches',icon:'🏪',desc:'Same mean, different spread: read the data like a manager.',count:8,gen:[gCompare]},
+ {name:'Chebyshev Run',icon:'🛡️',desc:'Guaranteed minimum shares for any shape: percents, k and intervals.',count:8,gen:[gCheb]},
+ {name:'Bell Curve',icon:'🔔',desc:'The Empirical Rule: 68 / 95 / 99.7, tails and unusual values.',count:8,gen:[gEmp]},
+ {name:'Full Challenge',icon:'🏆',desc:'Fifteen mixed questions from all the rounds.',count:15,gen:[gRange,()=>gVar(true),()=>gVar(false),gSD,gCompare,gCheb,gEmp]},
+];
+
+// ---------------- engine ----------------
+let deck=[],idx=0,score=0,streak=0,best=0,answered=false,log=[],roundTitle='';
+function buildMenu(){
+  $('modeCards').innerHTML=MODES.map((m,i)=>`<div class="mode" onclick="start(${i})"><h3>${m.icon} ${m.name}</h3><p>${m.desc}</p></div>`).join('');
+}
+function start(i){
+  const m=MODES[i]; roundTitle=m.name;
+  deck=[]; const gens=m.gen;
+  for(let k=0;k<m.count;k++) deck.push(pick(gens)());
+  idx=0;score=0;streak=0;best=0;log=[];
+  $('menu').style.display='none';$('results').style.display='none';$('game').style.display='block';
+  $('roundName').textContent=m.name; show();
+}
+function menu(){$('game').style.display='none';$('results').style.display='none';$('menu').style.display='block'}
+function show(){
+  const c=deck[idx]; answered=false; $('fb').className='feedback'; $('nextBtn').disabled=true; $('nextBtn').textContent='Next ▶';
+  $('caseNo').textContent=(idx+1)+' / '+deck.length; $('score').textContent=score; $('streak').textContent=streak;
+  $('bar').style.width=(idx/deck.length*100)+'%';
+  $('prompt').innerHTML=c.prompt; $('stage').innerHTML=c.stage||'';
+  if(c.type==='num'){
+    $('answerArea').innerHTML=`<div class="numin"><input id="numAns" type="number" step="any" placeholder="Your answer" onkeydown="if(event.key==='Enter')checkNum()"> ${c.unit||''} <button class="btn" onclick="checkNum()">Check</button></div><div class="hint">${c.hint||''}</div>`;
+    setTimeout(()=>$('numAns').focus(),50);
+  } else {
+    $('answerArea').innerHTML='<div class="opts">'+c.opts.map((op,i)=>`<div class="opt" onclick="answerMC(${i})"><span class="lbl">${'ABCD'[i]}</span>${op.html}</div>`).join('')+'</div>';
+  }
+}
+function grade(ok,mineTxt,correctTxt,why){
+  answered=true; const c=deck[idx];
+  if(ok){score+=1+(streak>=3?1:0);streak++;best=Math.max(best,streak);
+    $('fb').className='feedback ok';$('fb').innerHTML='✅ <b>Correct.</b> '+why+(streak>=3?' <em>Streak bonus +1!</em>':'');}
+  else{streak=0;$('fb').className='feedback bad';$('fb').innerHTML='❌ <b>Not quite.</b> The answer is <b>'+correctTxt+'</b>. '+why;}
+  log.push({q:c.prompt,correct:correctTxt,mine:mineTxt,ok});
+  $('score').textContent=score;$('streak').textContent=streak;
+  $('nextBtn').disabled=false;$('nextBtn').textContent=idx+1>=deck.length?'Finish ▶':'Next ▶';
+}
+function checkNum(){
+  if(answered)return; const c=deck[idx]; const v=parseFloat($('numAns').value);
+  if(isNaN(v)){$('fb').className='feedback bad';$('fb').innerHTML='Type a number first.';return}
+  const ok=Math.abs(v-c.answer)<=(c.tol!==undefined?c.tol:0.011);
+  grade(ok,fmt(v),fmt(c.answer),c.why);
+}
+function answerMC(i){
+  if(answered)return; const c=deck[idx];
+  const els=[...document.querySelectorAll('.opt')];
+  els[i].classList.add(c.opts[i].ok?'right':'wrong');
+  els[c.opts.findIndex(o=>o.ok)].classList.add('right');
+  grade(c.opts[i].ok, c.opts[i].html.replace(/<[^>]+>/g,''), c.opts.find(o=>o.ok).html.replace(/<[^>]+>/g,''), c.why);
+}
+function next(){idx++; if(idx>=deck.length){finish();return} show()}
+function finish(){
+  $('game').style.display='none';$('results').style.display='block';
+  const n=deck.length,right=log.filter(l=>l.ok).length,p=right/n;
+  $('badge').textContent=p>=.9?'🏆':p>=.7?'🥈':p>=.5?'🥉':'📘';
+  $('summary').innerHTML=`<b>${roundTitle}</b>: you solved <b>${right}</b> of ${n} (score ${score}, best streak ${best}). `+(p>=.9?'Excellent!':p>=.7?'Good. Check the review below.':'Keep practising: read the worked answers below, then play again.');
+  $('review').querySelector('tbody').innerHTML=log.map((l,i)=>`<tr><td>${i+1}. ${l.q.replace(/<[^>]+>/g,'').slice(0,90)}…</td><td>${l.correct}</td><td style="color:${l.ok?'#1f9d55':'#d64545'}">${l.ok?'✔':'✘'} ${l.mine}</td></tr>`).join('');
+}
+buildMenu();
+</script>
+</body>
+</html>
