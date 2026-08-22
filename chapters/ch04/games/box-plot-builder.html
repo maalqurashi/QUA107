@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QUA107 · Chapter 4 · Box Plot Builder</title>
+<style>
+  @font-face{font-family:'SaudiRiyal';src:url(data:font/woff2;base64,d09GMgABAAAAAALQAA0AAAAABmAAAAJ8AAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP0ZGVE0cBmAAgkIIBBEICoFkgV4LCgABNgIkAxAEIAWEEAcqG2sFII7RS88cU5STILSS4qFvjPZnd860iVlEzJpYwjMh8YiUTIsk9dBOfHC/9vZR7+OS2G6oe1PNYtZcG1UbGepdnMqJRTj3AJ5FY9IAWgKhiIR0DlyzXIEKVaimFaxBzV0T+RGsse4hpRCTEPDx7aMa4OvPoMk4KXhL5vMY1UB5WY7wil40PlkLgaKhBUABgAsPAvLRij/+VKpxllpFuEEAYBRBRcUgAvbQEhikbRSkFPizq/H1u30IEI2sryggfgshfVNFTx8rLSB2NQSQoBmJNXAYQDuWCaBkNk4Y6XTktbJn66O7M6vZ83ezSbxW6/iVzez5jTxCeJLW5XmBbCPHw3SOjRmM/aS3ybfKobiYoLQuJ4d9mS3vxTZN5kOO0ZFJEq+07kG3XgPntIZf9fzh+Y8wzef6vKPRKbX7JysP29JgDtzada0fVbRLsLJnT0/b//VdXZ13HKYlGNjVkqA6hFzTjS0WI8JbgyB4PZu6cdPM/a/ZqP4asvyY8r8A0KyAoI5rXKVmLVA/CQBA5nO2QD6HfC4bQZojgIIQOEAJoNMbBKCPPQJCizsIKJq8QEA15U2A1BKtAjToik0Q0KglbtAS2YJ1YCH0ioSi00OoTumE1OsfGgyH9ec06g1/fqpUa1GrRJFi9SixPBIUx3AO5KgctQoUq4Cvgap5kpe0nMqpLSiuAK6qVK9EvXIF8nG4+niyKc7nwCUFijQoVyjgGjQHOKaqK1XVaxUFhAZTYihXVDEjcnPOFDgFWBa7OYmiobaogHIlo64UAMna3FnBFYg9QUWuObXqlEDTKZbhakpMwBLNZEytZMmTwscLsHtoHQQAgDxlyT4H) format('woff2')}
+  :root{--blue:#008DC3;--blue-dark:#0075A3;--grey:#748995;--cream:#E3E0D2;--ink:#1d2731;--ok:#1f9d55;--bad:#d64545;--card:#ffffff}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--cream);color:var(--ink);line-height:1.4}
+  header{background:var(--blue);color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  header h1{margin:0;font-size:1.25rem;letter-spacing:.2px}
+  header .sub{font-size:.85rem;opacity:.9}
+  header a{color:inherit}
+  .sar{font-family:'SaudiRiyal',sans-serif;font-style:normal}
+  .wrap{max-width:1000px;margin:0 auto;padding:18px}
+  .hud{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+  .stat{background:var(--card);border-radius:12px;padding:10px 14px;min-width:110px;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+  .stat .lbl{font-size:.72rem;color:var(--grey);text-transform:uppercase;letter-spacing:.06em}
+  .stat .val{font-size:1.4rem;font-weight:700;color:var(--blue-dark)}
+  .panel{background:var(--card);border-radius:16px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.08);margin-bottom:16px}
+  .btn{background:var(--blue);color:#fff;border:0;border-radius:999px;padding:10px 20px;font-size:1rem;cursor:pointer;font-weight:600}
+  .btn:hover{background:var(--blue-dark)}
+  .btn.ghost{background:transparent;color:var(--blue-dark);border:2px solid var(--blue)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+  .mode{border:2px solid #e2e6ea;border-radius:14px;padding:16px;cursor:pointer;transition:.15s;background:#fff}
+  .mode:hover{border-color:var(--blue);transform:translateY(-2px)}
+  .mode h3{margin:0 0 6px;color:var(--blue-dark)}
+  .mode p{margin:0;font-size:.92rem;color:#445}
+  .hint{font-size:.9rem;color:var(--grey)}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+  table{border-collapse:collapse;font-size:.95rem;margin:8px 0}
+  th,td{border:1px solid #e2e6ea;padding:6px 10px;text-align:center}
+  th{background:#eef5f8;color:var(--blue-dark)}
+  .prompt{font-size:1.06rem;margin:0 0 10px}
+  .data{font-family:Consolas,Menlo,monospace;background:#f4f6f2;border:1px solid #e2e6ea;border-radius:10px;padding:10px 12px;font-size:1.05rem;letter-spacing:.03em;display:inline-block;margin:4px 0 10px}
+  .opts{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
+  .opt{border:2px solid #e2e6ea;border-radius:12px;padding:10px 12px;cursor:pointer;background:#fff;font-size:1rem;text-align:left}
+  .opt .lbl{display:inline-block;background:#eef5f8;color:var(--blue-dark);font-weight:700;border-radius:6px;padding:1px 8px;margin-right:8px}
+  .opt:hover{border-color:var(--blue)}
+  .opt.right{border-color:var(--ok);background:#f0faf4}
+  .opt.wrong{border-color:var(--bad);background:#fdf3f3}
+  .numin{display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap}
+  .numin input{font-size:1.15rem;padding:9px 12px;border:2px solid #cfd8de;border-radius:10px;width:170px}
+  .numin input:focus{outline:none;border-color:var(--blue)}
+  .feedback{display:none;border-radius:12px;padding:12px 14px;margin-top:12px;font-size:.98rem}
+  .feedback.ok{display:block;background:#f0faf4;border:1px solid var(--ok)}
+  .feedback.bad{display:block;background:#fdf3f3;border:1px solid var(--bad)}
+  .barwrap{height:8px;background:#dfe5e9;border-radius:99px;margin:10px 0 16px;overflow:hidden}
+  #bar{height:100%;width:0;background:var(--blue);transition:width .3s}
+  #results .badge{font-size:3rem}
+  #review td:first-child{text-align:left}
+  footer{text-align:center;color:var(--grey);font-size:.8rem;padding:14px}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>📦 Box Plot Builder</h1><div class="sub">QUA 107 · Chapter 4 · Box plots and measures of symmetry (LO 4.1)</div></div>
+  <div class="sub" style="text-align:right">King Saud University · College of Business Administration<br><a href="../../../index.html">QUA 107 course page</a> · <a href="../slides.html">Chapter 4 slides</a></div>
+</header>
+<div class="wrap">
+  <div id="menu">
+    <div class="panel"><p class="prompt"><b>Choose a round.</b> Every play generates new numbers, so you can practise as often as you like. Rounds cover the five-number summary, the IQR, outlier boundaries, reading box plots and the skewness coefficient.</p>
+      <div class="modes" id="modeCards"></div>
+    </div>
+  </div>
+  <div id="game" style="display:none">
+    <div class="hud">
+      <div class="stat"><div class="lbl">Question</div><div class="val" id="caseNo">1</div></div>
+      <div class="stat"><div class="lbl">Score</div><div class="val" id="score">0</div></div>
+      <div class="stat"><div class="lbl">Streak</div><div class="val" id="streak">0</div></div>
+      <div class="stat" style="flex:1"><div class="lbl">Round</div><div class="val" id="roundName" style="font-size:1.05rem;padding-top:6px"></div></div>
+    </div>
+    <div class="barwrap"><div id="bar"></div></div>
+    <div class="panel">
+      <p class="prompt" id="prompt"></p>
+      <div id="stage"></div>
+      <div id="answerArea"></div>
+      <div class="feedback" id="fb"></div>
+      <div class="row" style="margin-top:14px">
+        <button class="btn ghost" onclick="menu()">◀ Rounds</button>
+        <button class="btn" id="nextBtn" onclick="next()" disabled>Next ▶</button>
+      </div>
+    </div>
+  </div>
+  <div id="results" style="display:none">
+    <div class="panel" style="text-align:center">
+      <div class="badge" id="badge"></div>
+      <p class="prompt" id="summary"></p>
+      <button class="btn" onclick="menu()">Play another round</button>
+    </div>
+    <div class="panel"><b>Review</b>
+      <table id="review" style="width:100%"><thead><tr><th>Question</th><th>Correct answer</th><th>Your answer</th></tr></thead><tbody></tbody></table>
+    </div>
+  </div>
+</div>
+<footer>QUA 107 · Introduction to Business Statistics · Practice game (not graded).</footer>
+<script>
+const $=id=>document.getElementById(id);
+const RY='<span class="sar">ê</span>';
+function ri(a,b){return a+Math.floor(Math.random()*(b-a+1))}
+function pick(a){return a[Math.floor(Math.random()*a.length)]}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function sampleDistinct(n,lo,hi){const s=new Set();while(s.size<n)s.add(ri(lo,hi));return [...s]}
+function fmt(x){return Math.abs(x-Math.round(x))<1e-9?String(Math.round(x)):x.toFixed(2).replace(/0$/,'').replace(/\\.$/,'')}
+function mean(a){return a.reduce((s,v)=>s+v,0)/a.length}
+function median(a){const s=a.slice().sort((x,y)=>x-y),n=s.length;return n%2?s[(n-1)/2]:(s[n/2-1]+s[n/2])/2}
+function dataBox(a){return '<div class="data">'+a.join(', ')+'</div>'}
+function sortedTable(a){let h='<tr><th>Position</th>'+a.map((_,i)=>'<th>'+(i+1)+'</th>').join('')+'</tr>';let r='<tr><td><b>Value</b></td>'+a.map(v=>'<td>'+v+'</td>').join('')+'</tr>';return '<table>'+h+r+'</table>'}
+
+
+const INKC='#0B5F86', BLUEC='#008DC3', GREYC='#748995';
+function fiveNum(a){const s=a.slice().sort((x,y)=>x-y),n=s.length;
+  const L=p=>{const loc=(n+1)*p/100,b=Math.floor(loc),f=loc-b;return f?s[b-1]+f*(s[b]-s[b-1]):s[b-1];};
+  return {min:s[0],q1:L(25),med:L(50),q3:L(75),max:s[n-1],s:s};}
+function svgBox(f,opts){
+  // f: {min,q1,med,q3,max}; opts: {lo,hi,outs:[values],label}
+  opts=opts||{}; const lo=Math.min(f.min,...(opts.outs||[]))-5, hi=Math.max(f.max,...(opts.outs||[]))+5;
+  const W=560,H=150,L=40,Rr=W-30,yc=62,bh=36;
+  const x=v=>L+(Rr-L)*(v-lo)/(hi-lo);
+  const wlo=opts.wlo!==undefined?opts.wlo:f.min, whi=opts.whi!==undefined?opts.whi:f.max;
+  let g='';
+  g+=`<line x1="${x(wlo)}" y1="${yc}" x2="${x(f.q1)}" y2="${yc}" stroke="${INKC}" stroke-width="2"/>`;
+  g+=`<line x1="${x(f.q3)}" y1="${yc}" x2="${x(whi)}" y2="${yc}" stroke="${INKC}" stroke-width="2"/>`;
+  g+=`<line x1="${x(wlo)}" y1="${yc-bh/3}" x2="${x(wlo)}" y2="${yc+bh/3}" stroke="${INKC}" stroke-width="2"/>`;
+  g+=`<line x1="${x(whi)}" y1="${yc-bh/3}" x2="${x(whi)}" y2="${yc+bh/3}" stroke="${INKC}" stroke-width="2"/>`;
+  g+=`<rect x="${x(f.q1)}" y="${yc-bh/2}" width="${x(f.q3)-x(f.q1)}" height="${bh}" fill="rgba(0,141,195,.18)" stroke="${INKC}" stroke-width="2"/>`;
+  g+=`<line x1="${x(f.med)}" y1="${yc-bh/2}" x2="${x(f.med)}" y2="${yc+bh/2}" stroke="${INKC}" stroke-width="3.5"/>`;
+  (opts.outs||[]).forEach(o=>{g+=`<circle cx="${x(o)}" cy="${yc}" r="6" fill="none" stroke="${INKC}" stroke-width="2"/>`;});
+  // axis
+  g+=`<line x1="${L}" y1="${yc+50}" x2="${Rr}" y2="${yc+50}" stroke="${INKC}" stroke-width="1.5"/>`;
+  const step=Math.max(1,Math.round((hi-lo)/8));
+  for(let v=Math.ceil(lo/step)*step; v<=hi; v+=step){
+    g+=`<line x1="${x(v)}" y1="${yc+50}" x2="${x(v)}" y2="${yc+56}" stroke="${INKC}"/><text x="${x(v)}" y="${yc+72}" font-size="11" fill="${INKC}" text-anchor="middle">${v}</text>`;}
+  return `<svg viewBox="0 0 ${W} ${H}" style="max-width:560px;width:100%;background:#fff;border:1px solid #e2e6ea;border-radius:10px">${g}</svg>`;
+}
+function svgScatter(pts,xlab,ylab){
+  const W=440,H=300,L=46,B=H-40,T=18,Rr=W-16;
+  const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]);
+  const x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);
+  const x=v=>L+(Rr-L)*(v-x0)/((x1-x0)||1), y=v=>B-(B-T)*(v-y0)/((y1-y0)||1);
+  let g=`<line x1="${L}" y1="${B}" x2="${Rr}" y2="${B}" stroke="${INKC}" stroke-width="1.5"/><line x1="${L}" y1="${T}" x2="${L}" y2="${B}" stroke="${INKC}" stroke-width="1.5"/>`;
+  pts.forEach(p=>{g+=`<circle cx="${x(p[0]).toFixed(1)}" cy="${y(p[1]).toFixed(1)}" r="5.5" fill="${BLUEC}" fill-opacity=".85" stroke="#fff"/>`;});
+  g+=`<text x="${(L+Rr)/2}" y="${H-6}" font-size="12" fill="#33434d" text-anchor="middle">${xlab||''}</text>`;
+  g+=`<text x="14" y="${(T+B)/2}" font-size="12" fill="#33434d" text-anchor="middle" transform="rotate(-90 14 ${(T+B)/2})">${ylab||''}</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" style="max-width:440px;width:100%;background:#fff;border:1px solid #e2e6ea;border-radius:10px">${g}</svg>`;
+}
+const CTXS=[['daily sales of a Saudia Ice Cream kiosk (units)','units'],
+ ['overtime hours at an ice cream factory','hours'],
+ ['laptops sold per day at a Jarir branch','laptops'],
+ ['customers served per hour at a bank branch','customers'],
+ ['orders delivered per day by a Jahez driver','orders'],
+ ['meals sold per hour at an Al Baik branch','meals'],
+ ['rooms occupied per night at a hotel in AlUla','rooms'],
+ ['calls answered per hour at a stc call centre','calls']];
+
+function gFive(){
+  const [c,u]=pick(CTXS); const n=pick([7,11,15]);
+  const a=sampleDistinct(n,10,95).sort((x,y)=>x-y);
+  const f=fiveNum(a);
+  const pos={7:{q1:2,med:4,q3:6},11:{q1:3,med:6,q3:9},15:{q1:4,med:8,q3:12}}[n];
+  const which=pick(['q1','med','q3']);
+  const lab={q1:'the first quartile Q1',med:'the median',q3:'the third quartile Q3'}[which];
+  return {type:'num',prompt:`<b>Five Numbers.</b> Sorted values of <b>${c}</b> (n = ${n}):`,
+    stage:sortedTable(a),answer:f[which],unit:u,hint:'(n + 1) positions: Q1, median, Q3 sit at whole positions here.',
+    why:`With n = ${n}, (n + 1) = ${n+1}: ${lab} sits at position ${pos[which]} of the sorted list: ${f[which]}.`};
+}
+function gIQR(){
+  const [c,u]=pick(CTXS); const q1=pick([10,15,20,25,30,40,50]); const w=pick([8,12,16,20,24,30]);
+  return {type:'num',prompt:`<b>IQR Dash.</b> For the values of <b>${c}</b>: Q1 = <b>${q1}</b> and Q3 = <b>${q1+w}</b>.<br>Compute the <b>interquartile range</b>.`,
+    answer:w,unit:u,hint:'IQR = Q3 − Q1: the length of the box.',
+    why:`IQR = ${q1+w} − ${q1} = ${w}: the range of the middle 50% of the values.`};
+}
+function gFence(){
+  const [c,u]=pick(CTXS); const q1=pick([12,20,30,36,40,50]); const w=pick([8,12,16,20,24]);
+  const side=pick(['lower','upper']); const ans=side==='lower'? q1-1.5*w : q1+w+1.5*w;
+  return {type:'num',prompt:`<b>Fence Finder.</b> For <b>${c}</b>: Q1 = <b>${q1}</b>, Q3 = <b>${q1+w}</b>.<br>Compute the <b>${side} boundary</b> for outliers (1.5 × IQR rule).`,
+    answer:ans,unit:u,hint:side==='lower'?'Q1 − 1.5 × IQR':'Q3 + 1.5 × IQR',
+    why:`IQR = ${w}; ${side==='lower'?`lower boundary = ${q1} − 1.5 × ${w}`:`upper boundary = ${q1+w} + 1.5 × ${w}`} = ${fmt(ans)}.`};
+}
+function gOutlier(){
+  const [c,u]=pick(CTXS); const q1=pick([15,20,30,40]); const w=pick([10,16,20]);
+  const q3=q1+w, lo=q1-1.5*w, hi=q3+1.5*w;
+  const kind=pick(['out_hi','out_lo','in_hi','in_lo']);
+  const v=kind==='out_hi'?hi+ri(2,9):kind==='out_lo'?lo-ri(2,9):kind==='in_hi'?hi-ri(1,5):lo+ri(1,5);
+  const isOut=kind==='out_hi'||kind==='out_lo';
+  const opts=shuffle([
+    {html:isOut?`Yes: ${fmt(v)} is outside the boundaries (${fmt(lo)} to ${fmt(hi)})`:`No: ${fmt(v)} is inside the boundaries (${fmt(lo)} to ${fmt(hi)})`,ok:true},
+    {html:isOut?`No: ${fmt(v)} is inside the boundaries`:`Yes: ${fmt(v)} is outside the boundaries`,ok:false},
+    {html:'It cannot be decided without the mean and standard deviation',ok:false},
+    {html:isOut?'No: a value must be more than 3 × IQR beyond the box to count':(v>q3?'Yes, because it is larger than Q3':'Yes, because it is smaller than Q1'),ok:false}]);
+  return {type:'mc',prompt:`<b>Outlier or Not.</b> Values of <b>${c}</b>: Q1 = ${q1}, Q3 = ${q3}. One value equals <b>${fmt(v)}</b>.<br>Is it an outlier?`,
+    opts,why:`IQR = ${w}; boundaries ${fmt(lo)} and ${fmt(hi)}. Outside the box is NOT enough: a value must pass a boundary.`};
+}
+function gReadBox(){
+  const [c,u]=pick(CTXS);
+  const kind=pick(['med','shape','shape','iqr']);
+  if(kind==='med'){
+    const m=pick([30,40,50,60]); const w=pick([10,14,18]);
+    const f={min:m-w-ri(3,8),q1:m-w/2,med:m+pick([-3,-1,0,1,3]),q3:m+w/2,max:m+w+ri(3,8)};
+    const cand=[f.q1,f.q3,Math.round((f.min+f.max)/2),f.min,f.max].filter((v,i,a)=>v!==f.med&&a.indexOf(v)===i).slice(0,3);
+    const opts=shuffle([{html:String(f.med),ok:true}].concat(cand.map(v=>({html:String(v),ok:false}))));
+    return {type:'mc',prompt:`<b>Read the Box.</b> The box plot shows <b>${c}</b>.<br>What is the median?`,stage:svgBox(f),
+      opts,why:'The median is the line INSIDE the box, not the centre of the axis.'};
+  }
+  if(kind==='iqr'){
+    const q1=pick([20,30,40]); const w=pick([10,16,20]);
+    const f={min:q1-ri(6,12),q1:q1,med:q1+Math.round(w/2),q3:q1+w,max:q1+w+ri(6,12)};
+    const candI=[f.max-f.min,f.q3,Math.round(w/2),f.q1,f.med].filter((v,i,a)=>v!==w&&a.indexOf(v)===i).slice(0,3);
+    const opts=shuffle([{html:String(w),ok:true}].concat(candI.map(v=>({html:String(v),ok:false}))));
+    return {type:'mc',prompt:`<b>Read the Box.</b> The box plot shows <b>${c}</b>.<br>What is the IQR?`,stage:svgBox(f),
+      opts,why:`The IQR is the LENGTH OF THE BOX: Q3 − Q1 = ${f.q3} − ${f.q1} = ${w}.`};
+  }
+  const right=Math.random()<0.5; const b=pick([20,30,40]);
+  const f=right?{min:b,q1:b+2,med:b+5,q3:b+14,max:b+30}:{min:b,q1:b+16,med:b+25,q3:b+28,max:b+30};
+  const opts=shuffle([
+    {html:right?'Skewed right: median near Q1, long right whisker':'Skewed left: median near Q3, long left whisker',ok:true},
+    {html:right?'Skewed left: median near Q3, long left whisker':'Skewed right: median near Q1, long right whisker',ok:false},
+    {html:'Symmetric: median in the middle, equal whiskers',ok:false},
+    {html:'Bimodal: the box has two peaks',ok:false}]);
+  return {type:'mc',prompt:`<b>Read the Box.</b> The box plot shows <b>${c}</b>.<br>What is the shape of the distribution?`,stage:svgBox(f),
+    opts,why:'The skew follows the LONG side: check where the median sits and which whisker is longer.'};
+}
+function gSkew(){
+  if(Math.random()<0.55){
+    const mean=pick([30,45,60,75]); const gap=pick([-12,-8,-4,4,8,12]); const s=pick([8,10,12,16]);
+    const sk=3*gap/s;
+    return {type:'num',prompt:`<b>Skew Detector.</b> A sample has mean <b>${mean}</b>, median <b>${mean-gap}</b> and standard deviation <b>${s}</b>.<br>Compute <b>Pearson's coefficient of skewness</b> (2 decimals).`,
+      answer:+sk.toFixed(2),tol:0.02,hint:'sk = 3(mean − median)/s',
+      why:`sk = 3(${mean} − ${mean-gap})/${s} = ${sk.toFixed(2)}: ${sk>0?'positive (skewed right)':sk<0?'negative (skewed left)':'symmetric'}.`};
+  }
+  const v=pick([-2.4,-1.5,-0.8,-0.1,0.1,0.9,1.5,2.6]);
+  const dir=Math.abs(v)<0.3?'sym':(v>0?'right':'left');
+  const opts=shuffle([
+    {html:dir==='sym'?'Roughly symmetric: mean ≈ median':(dir==='right'?'Skewed right: a tail of large values pulls the mean above the median':'Skewed left: a tail of small values pulls the mean below the median'),ok:true},
+    {html:dir==='right'?'Skewed left: a tail of small values':'Skewed right: a tail of large values',ok:false},
+    {html:dir==='sym'?'Strongly skewed right':'Roughly symmetric: mean ≈ median',ok:false},
+    {html:'Impossible: sk must be between −1 and +1',ok:false}]);
+  return {type:'mc',prompt:`<b>Skew Detector.</b> A data set reports a skewness coefficient of <b>sk = ${v}</b>.<br>What does it mean?`,
+    opts,why:'The sign gives the tail direction; the size (up to ±3) gives the strength; near 0 means symmetric.'};
+}
+const MODES=[
+ {name:'Five Numbers',icon:'🖐️',desc:'Q1, median and Q3 from sorted data: the skeleton of every box plot.',count:8,gen:[gFive]},
+ {name:'IQR Dash',icon:'📦',desc:'The length of the box: Q3 − Q1, at speed.',count:8,gen:[gIQR]},
+ {name:'Fence Finder',icon:'🚧',desc:'The 1.5 × IQR outlier boundaries, lower and upper.',count:8,gen:[gFence]},
+ {name:'Outlier or Not',icon:'🔍',desc:'Judge suspicious values against the boundaries.',count:8,gen:[gOutlier]},
+ {name:'Read the Box',icon:'👓',desc:'Medians, IQRs and shapes straight from drawn box plots.',count:8,gen:[gReadBox]},
+ {name:'Skew Detector',icon:'⚖️',desc:"Pearson's coefficient: compute it and interpret it.",count:8,gen:[gSkew]},
+ {name:'Full Challenge',icon:'🏆',desc:'Fifteen mixed questions from all the rounds.',count:15,gen:[gFive,gIQR,gFence,gOutlier,gReadBox,gSkew]},
+];
+
+// ---------------- engine ----------------
+let deck=[],idx=0,score=0,streak=0,best=0,answered=false,log=[],roundTitle='';
+function buildMenu(){
+  $('modeCards').innerHTML=MODES.map((m,i)=>`<div class="mode" onclick="start(${i})"><h3>${m.icon} ${m.name}</h3><p>${m.desc}</p></div>`).join('');
+}
+function start(i){
+  const m=MODES[i]; roundTitle=m.name;
+  deck=[]; const gens=m.gen;
+  for(let k=0;k<m.count;k++) deck.push(pick(gens)());
+  idx=0;score=0;streak=0;best=0;log=[];
+  $('menu').style.display='none';$('results').style.display='none';$('game').style.display='block';
+  $('roundName').textContent=m.name; show();
+}
+function menu(){$('game').style.display='none';$('results').style.display='none';$('menu').style.display='block'}
+function show(){
+  const c=deck[idx]; answered=false; $('fb').className='feedback'; $('nextBtn').disabled=true; $('nextBtn').textContent='Next ▶';
+  $('caseNo').textContent=(idx+1)+' / '+deck.length; $('score').textContent=score; $('streak').textContent=streak;
+  $('bar').style.width=(idx/deck.length*100)+'%';
+  $('prompt').innerHTML=c.prompt; $('stage').innerHTML=c.stage||'';
+  if(c.type==='num'){
+    $('answerArea').innerHTML=`<div class="numin"><input id="numAns" type="number" step="any" placeholder="Your answer" onkeydown="if(event.key==='Enter')checkNum()"> ${c.unit||''} <button class="btn" onclick="checkNum()">Check</button></div><div class="hint">${c.hint||''}</div>`;
+    setTimeout(()=>$('numAns').focus(),50);
+  } else {
+    $('answerArea').innerHTML='<div class="opts">'+c.opts.map((op,i)=>`<div class="opt" onclick="answerMC(${i})"><span class="lbl">${'ABCD'[i]}</span>${op.html}</div>`).join('')+'</div>';
+  }
+}
+function grade(ok,mineTxt,correctTxt,why){
+  answered=true; const c=deck[idx];
+  if(ok){score+=1+(streak>=3?1:0);streak++;best=Math.max(best,streak);
+    $('fb').className='feedback ok';$('fb').innerHTML='✅ <b>Correct.</b> '+why+(streak>=3?' <em>Streak bonus +1!</em>':'');}
+  else{streak=0;$('fb').className='feedback bad';$('fb').innerHTML='❌ <b>Not quite.</b> The answer is <b>'+correctTxt+'</b>. '+why;}
+  log.push({q:c.prompt,correct:correctTxt,mine:mineTxt,ok});
+  $('score').textContent=score;$('streak').textContent=streak;
+  $('nextBtn').disabled=false;$('nextBtn').textContent=idx+1>=deck.length?'Finish ▶':'Next ▶';
+}
+function checkNum(){
+  if(answered)return; const c=deck[idx]; const v=parseFloat($('numAns').value);
+  if(isNaN(v)){$('fb').className='feedback bad';$('fb').innerHTML='Type a number first.';return}
+  const ok=Math.abs(v-c.answer)<=(c.tol!==undefined?c.tol:0.011);
+  grade(ok,fmt(v),fmt(c.answer),c.why);
+}
+function answerMC(i){
+  if(answered)return; const c=deck[idx];
+  const els=[...document.querySelectorAll('.opt')];
+  els[i].classList.add(c.opts[i].ok?'right':'wrong');
+  els[c.opts.findIndex(o=>o.ok)].classList.add('right');
+  grade(c.opts[i].ok, c.opts[i].html.replace(/<[^>]+>/g,''), c.opts.find(o=>o.ok).html.replace(/<[^>]+>/g,''), c.why);
+}
+function next(){idx++; if(idx>=deck.length){finish();return} show()}
+function finish(){
+  $('game').style.display='none';$('results').style.display='block';
+  const n=deck.length,right=log.filter(l=>l.ok).length,p=right/n;
+  $('badge').textContent=p>=.9?'🏆':p>=.7?'🥈':p>=.5?'🥉':'📘';
+  $('summary').innerHTML=`<b>${roundTitle}</b>: you solved <b>${right}</b> of ${n} (score ${score}, best streak ${best}). `+(p>=.9?'Excellent!':p>=.7?'Good. Check the review below.':'Keep practising: read the worked answers below, then play again.');
+  $('review').querySelector('tbody').innerHTML=log.map((l,i)=>`<tr><td>${i+1}. ${l.q.replace(/<[^>]+>/g,'').slice(0,90)}…</td><td>${l.correct}</td><td style="color:${l.ok?'#1f9d55':'#d64545'}">${l.ok?'✔':'✘'} ${l.mine}</td></tr>`).join('');
+}
+buildMenu();
+</script>
+</body>
+</html>
