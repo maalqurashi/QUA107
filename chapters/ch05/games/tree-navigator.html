@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QUA107 · Chapter 5 · Tree Navigator</title>
+<style>
+  @font-face{font-family:'SaudiRiyal';src:url(data:font/woff2;base64,d09GMgABAAAAAALQAA0AAAAABmAAAAJ8AAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP0ZGVE0cBmAAgkIIBBEICoFkgV4LCgABNgIkAxAEIAWEEAcqG2sFII7RS88cU5STILSS4qFvjPZnd860iVlEzJpYwjMh8YiUTIsk9dBOfHC/9vZR7+OS2G6oe1PNYtZcG1UbGepdnMqJRTj3AJ5FY9IAWgKhiIR0DlyzXIEKVaimFaxBzV0T+RGsse4hpRCTEPDx7aMa4OvPoMk4KXhL5vMY1UB5WY7wil40PlkLgaKhBUABgAsPAvLRij/+VKpxllpFuEEAYBRBRcUgAvbQEhikbRSkFPizq/H1u30IEI2sryggfgshfVNFTx8rLSB2NQSQoBmJNXAYQDuWCaBkNk4Y6XTktbJn66O7M6vZ83ezSbxW6/iVzez5jTxCeJLW5XmBbCPHw3SOjRmM/aS3ybfKobiYoLQuJ4d9mS3vxTZN5kOO0ZFJEq+07kG3XgPntIZf9fzh+Y8wzef6vKPRKbX7JysP29JgDtzada0fVbRLsLJnT0/b//VdXZ13HKYlGNjVkqA6hFzTjS0WI8JbgyB4PZu6cdPM/a/ZqP4asvyY8r8A0KyAoI5rXKVmLVA/CQBA5nO2QD6HfC4bQZojgIIQOEAJoNMbBKCPPQJCizsIKJq8QEA15U2A1BKtAjToik0Q0KglbtAS2YJ1YCH0ioSi00OoTumE1OsfGgyH9ec06g1/fqpUa1GrRJFi9SixPBIUx3AO5KgctQoUq4Cvgap5kpe0nMqpLSiuAK6qVK9EvXIF8nG4+niyKc7nwCUFijQoVyjgGjQHOKaqK1XVaxUFhAZTYihXVDEjcnPOFDgFWBa7OYmiobaogHIlo64UAMna3FnBFYg9QUWuObXqlEDTKZbhakpMwBLNZEytZMmTwscLsHtoHQQAgDxlyT4H) format('woff2')}
+  :root{--blue:#008DC3;--blue-dark:#0075A3;--grey:#748995;--cream:#E3E0D2;--ink:#1d2731;--ok:#1f9d55;--bad:#d64545;--card:#ffffff}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--cream);color:var(--ink);line-height:1.4}
+  header{background:var(--blue);color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  header h1{margin:0;font-size:1.25rem;letter-spacing:.2px}
+  header .sub{font-size:.85rem;opacity:.9}
+  header a{color:inherit}
+  .sar{font-family:'SaudiRiyal',sans-serif;font-style:normal}
+  .wrap{max-width:1000px;margin:0 auto;padding:18px}
+  .hud{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+  .stat{background:var(--card);border-radius:12px;padding:10px 14px;min-width:110px;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+  .stat .lbl{font-size:.72rem;color:var(--grey);text-transform:uppercase;letter-spacing:.06em}
+  .stat .val{font-size:1.4rem;font-weight:700;color:var(--blue-dark)}
+  .panel{background:var(--card);border-radius:16px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.08);margin-bottom:16px}
+  .btn{background:var(--blue);color:#fff;border:0;border-radius:999px;padding:10px 20px;font-size:1rem;cursor:pointer;font-weight:600}
+  .btn:hover{background:var(--blue-dark)}
+  .btn.ghost{background:transparent;color:var(--blue-dark);border:2px solid var(--blue)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+  .mode{border:2px solid #e2e6ea;border-radius:14px;padding:16px;cursor:pointer;transition:.15s;background:#fff}
+  .mode:hover{border-color:var(--blue);transform:translateY(-2px)}
+  .mode h3{margin:0 0 6px;color:var(--blue-dark)}
+  .mode p{margin:0;font-size:.92rem;color:#445}
+  .hint{font-size:.9rem;color:var(--grey)}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+  table{border-collapse:collapse;font-size:.95rem;margin:8px 0}
+  th,td{border:1px solid #e2e6ea;padding:6px 10px;text-align:center}
+  th{background:#eef5f8;color:var(--blue-dark)}
+  .prompt{font-size:1.06rem;margin:0 0 10px}
+  .data{font-family:Consolas,Menlo,monospace;background:#f4f6f2;border:1px solid #e2e6ea;border-radius:10px;padding:10px 12px;font-size:1.05rem;letter-spacing:.03em;display:inline-block;margin:4px 0 10px}
+  .opts{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
+  .opt{border:2px solid #e2e6ea;border-radius:12px;padding:10px 12px;cursor:pointer;background:#fff;font-size:1rem;text-align:left}
+  .opt .lbl{display:inline-block;background:#eef5f8;color:var(--blue-dark);font-weight:700;border-radius:6px;padding:1px 8px;margin-right:8px}
+  .opt:hover{border-color:var(--blue)}
+  .opt.right{border-color:var(--ok);background:#f0faf4}
+  .opt.wrong{border-color:var(--bad);background:#fdf3f3}
+  .numin{display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap}
+  .numin input{font-size:1.15rem;padding:9px 12px;border:2px solid #cfd8de;border-radius:10px;width:170px}
+  .numin input:focus{outline:none;border-color:var(--blue)}
+  .feedback{display:none;border-radius:12px;padding:12px 14px;margin-top:12px;font-size:.98rem}
+  .feedback.ok{display:block;background:#f0faf4;border:1px solid var(--ok)}
+  .feedback.bad{display:block;background:#fdf3f3;border:1px solid var(--bad)}
+  .barwrap{height:8px;background:#dfe5e9;border-radius:99px;margin:10px 0 16px;overflow:hidden}
+  #bar{height:100%;width:0;background:var(--blue);transition:width .3s}
+  #results .badge{font-size:3rem}
+  #review td:first-child{text-align:left}
+  footer{text-align:center;color:var(--grey);font-size:.8rem;padding:14px}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>🌳 Tree Navigator</h1><div class="sub">QUA 107 · Chapter 5 · Conditional probability and Bayes' theorem (LO 5.3)</div></div>
+  <div class="sub" style="text-align:right">King Saud University · College of Business Administration<br><a href="../../../index.html">QUA 107 course page</a> · <a href="../slides.html">Chapter 5 slides</a></div>
+</header>
+<div class="wrap">
+  <div id="menu">
+    <div class="panel"><p class="prompt"><b>Choose a round.</b> Every play generates new numbers, so you can practise as often as you like. Rounds cover probability trees, total probability, Bayes' theorem and the 1,000-cases check.</p>
+      <div class="modes" id="modeCards"></div>
+    </div>
+  </div>
+  <div id="game" style="display:none">
+    <div class="hud">
+      <div class="stat"><div class="lbl">Question</div><div class="val" id="caseNo">1</div></div>
+      <div class="stat"><div class="lbl">Score</div><div class="val" id="score">0</div></div>
+      <div class="stat"><div class="lbl">Streak</div><div class="val" id="streak">0</div></div>
+      <div class="stat" style="flex:1"><div class="lbl">Round</div><div class="val" id="roundName" style="font-size:1.05rem;padding-top:6px"></div></div>
+    </div>
+    <div class="barwrap"><div id="bar"></div></div>
+    <div class="panel">
+      <p class="prompt" id="prompt"></p>
+      <div id="stage"></div>
+      <div id="answerArea"></div>
+      <div class="feedback" id="fb"></div>
+      <div class="row" style="margin-top:14px">
+        <button class="btn ghost" onclick="menu()">◀ Rounds</button>
+        <button class="btn" id="nextBtn" onclick="next()" disabled>Next ▶</button>
+      </div>
+    </div>
+  </div>
+  <div id="results" style="display:none">
+    <div class="panel" style="text-align:center">
+      <div class="badge" id="badge"></div>
+      <p class="prompt" id="summary"></p>
+      <button class="btn" onclick="menu()">Play another round</button>
+    </div>
+    <div class="panel"><b>Review</b>
+      <table id="review" style="width:100%"><thead><tr><th>Question</th><th>Correct answer</th><th>Your answer</th></tr></thead><tbody></tbody></table>
+    </div>
+  </div>
+</div>
+<footer>QUA 107 · Introduction to Business Statistics · Practice game (not graded).</footer>
+<script>
+const $=id=>document.getElementById(id);
+const RY='<span class="sar">ê</span>';
+function ri(a,b){return a+Math.floor(Math.random()*(b-a+1))}
+function pick(a){return a[Math.floor(Math.random()*a.length)]}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function sampleDistinct(n,lo,hi){const s=new Set();while(s.size<n)s.add(ri(lo,hi));return [...s]}
+function fmt(x){return Math.abs(x-Math.round(x))<1e-9?String(Math.round(x)):x.toFixed(2).replace(/0$/,'').replace(/\\.$/,'')}
+function mean(a){return a.reduce((s,v)=>s+v,0)/a.length}
+function median(a){const s=a.slice().sort((x,y)=>x-y),n=s.length;return n%2?s[(n-1)/2]:(s[n/2-1]+s[n/2])/2}
+function dataBox(a){return '<div class="data">'+a.join(', ')+'</div>'}
+function sortedTable(a){let h='<tr><th>Position</th>'+a.map((_,i)=>'<th>'+(i+1)+'</th>').join('')+'</tr>';let r='<tr><td><b>Value</b></td>'+a.map(v=>'<td>'+v+'</td>').join('')+'</tr>';return '<table>'+h+r+'</table>'}
+
+
+const INKC='#0B5F86', BLUEC='#008DC3', GREYC='#748995';
+function p2(x){return (Math.round(x*10000)/10000).toString()}
+function svgTree(o){
+  // o: {n1,n2,ev,ok,pr,cA,cB, showJoint:[bool per leaf], hide:'pr'|'cA'|... , highlight:[0,2]}
+  const W=560,H=250,x0=20,x1=200,x2=400,xj=480;
+  const yR=125,y1=[65,185],y2=[35,95,155,215];
+  const pB=+(1-o.pr).toFixed(2), gA=+(1-o.cA).toFixed(2), gB=+(1-o.cB).toFixed(2);
+  const labs=[o.pr,pB], conds=[o.cA,gA,o.cB,gB];
+  const joints=[o.pr*o.cA,o.pr*gA,pB*o.cB,pB*gB];
+  const names2=[o.ev,o.ok,o.ev,o.ok];
+  let g='';
+  for(let i=0;i<2;i++){
+    g+=`<line x1="${x0+8}" y1="${yR}" x2="${x1-8}" y2="${y1[i]}" stroke="${INKC}" stroke-width="2"/>`;
+    const mx=(x0+x1)/2, my=(yR+y1[i])/2;
+    g+=`<text x="${mx}" y="${my+(i?16:-8)}" font-size="12" font-weight="bold" fill="${INKC}" text-anchor="middle">${o.hide==='pr'&&i===0?'?':p2(labs[i])}</text>`;
+    g+=`<circle cx="${x1}" cy="${y1[i]}" r="7" fill="#fff" stroke="${INKC}" stroke-width="2.5"/>`;
+    g+=`<text x="${x1}" y="${y1[i]-12}" font-size="12" fill="${INKC}" text-anchor="middle">${i===0?o.n1:o.n2}</text>`;
+  }
+  for(let k=0;k<4;k++){
+    const i=k<2?0:1;
+    const hot=(o.highlight||[]).includes(k);
+    const col=hot?BLUEC:INKC;
+    g+=`<line x1="${x1+8}" y1="${y1[i]}" x2="${x2-8}" y2="${y2[k]}" stroke="${col}" stroke-width="${hot?2.6:1.8}"/>`;
+    const mx=(x1+x2)/2, my=(y1[i]+y2[k])/2;
+    const ht=(o.hide==='cA'&&k===0)||(o.hide==='cB'&&k===2)?'?':p2(conds[k]);
+    g+=`<text x="${mx}" y="${my+(k%2?15:-7)}" font-size="12" font-weight="bold" fill="${col}" text-anchor="middle">${ht}</text>`;
+    g+=`<circle cx="${x2}" cy="${y2[k]}" r="6" fill="#fff" stroke="${col}" stroke-width="2.2"/>`;
+    g+=`<text x="${x2+12}" y="${y2[k]+4}" font-size="12" fill="${col}">${names2[k]}</text>`;
+    if(o.showJoint&&o.showJoint[k]) g+=`<text x="${xj+42}" y="${y2[k]+4}" font-size="12" font-weight="bold" fill="${col}" text-anchor="middle">${p2(joints[k])}</text>`;
+    else if(o.showJoint) g+=`<text x="${xj+42}" y="${y2[k]+4}" font-size="13" font-weight="bold" fill="${GREYC}" text-anchor="middle">?</text>`;
+  }
+  return `<svg viewBox="0 0 ${W} ${H}" style="max-width:560px;width:100%;background:#fff;border:1px solid #e2e6ea;border-radius:10px">${g}</svg>`;
+}
+
+const SCEN=[
+ {place:'factory',n1:'Machine A',n2:'Machine B',ev:'Defective',ok:'Good',items:'juice boxes'},
+ {place:'bakery',n1:'Day shift',n2:'Night shift',ev:'Burnt',ok:'Good',items:'loaves'},
+ {place:'logistics company',n1:'Carrier K',n2:'Carrier L',ev:'Late',ok:'On time',items:'shipments'},
+ {place:'call centre',n1:'Riyadh team',n2:'Jeddah team',ev:'Dropped',ok:'Completed',items:'calls'},
+ {place:'print shop',n1:'Printer X',n2:'Printer Y',ev:'Smudged',ok:'Clean',items:'pages'},
+];
+const PARS=[[60,1,2],[70,5,10],[80,2,5],[55,4,8],[75,2,6],[65,10,20],[50,3,9],[85,1,4],[60,5,15],[70,2,8]];
+function setup(){
+  const s=pick(SCEN), [pr,eA,eB]=pick(PARS);
+  return {s,pr:pr/100,cA:eA/100,cB:eB/100,
+    text:`At a ${s.place}, <b>${s.n1}</b> handles <b>${pr}%</b> of the ${s.items} and <b>${s.n2}</b> handles <b>${100-pr}%</b>. The probability of the event (<b>${s.ev.toLowerCase()}</b>) is <b>${eA}%</b> for ${s.n1} and <b>${eB}%</b> for ${s.n2}.`};
+}
+function gJoint(){
+  const c=setup(); const which=Math.random()<0.5?1:2;
+  const pr=which===1?c.pr:+(1-c.pr).toFixed(2);
+  const cd=which===1?c.cA:c.cB;
+  const name=which===1?c.s.n1:c.s.n2;
+  const leaf=which===1?0:2;
+  return {type:'num',prompt:`<b>Grow the Tree.</b> ${c.text}<br>Compute the <b>JOINT</b> probability of the path: <b>${name} AND ${c.s.ev.toLowerCase()}</b>. (up to 4 decimals)`,
+    stage:svgTree({n1:c.s.n1,n2:c.s.n2,ev:c.s.ev,ok:c.s.ok,pr:c.pr,cA:c.cA,cB:c.cB,showJoint:[0,1,2,3].map(i=>i!==leaf),highlight:[leaf]}),
+    answer:+(pr*cd).toFixed(4),tol:0.0006,hint:'Multiply ALONG the path: prior × conditional.',
+    why:`${p2(pr)} × ${p2(cd)} = ${p2(pr*cd)}: the prior of ${name} times the conditional of the event given ${name}.`};
+}
+function gTotal(){
+  const c=setup();
+  const jA=c.pr*c.cA, jB=(1-c.pr)*c.cB, tot=jA+jB;
+  return {type:'num',prompt:`<b>Total Collector.</b> ${c.text}<br>Compute the <b>TOTAL</b> probability of the event (<b>${c.s.ev.toLowerCase()}</b>). (up to 4 decimals)`,
+    stage:svgTree({n1:c.s.n1,n2:c.s.n2,ev:c.s.ev,ok:c.s.ok,pr:c.pr,cA:c.cA,cB:c.cB,showJoint:[true,true,true,true],highlight:[0,2]}),
+    answer:+tot.toFixed(4),tol:0.0006,hint:'Add the joints of the two highlighted paths.',
+    why:`${p2(jA)} + ${p2(jB)} = ${p2(tot)}: two mutually exclusive paths reach the event, so their joints add.`};
+}
+function gBayes(){
+  const c=setup(); const which=Math.random()<0.5?1:2;
+  const jA=c.pr*c.cA, jB=(1-c.pr)*c.cB, tot=jA+jB;
+  const j=which===1?jA:jB; const name=which===1?c.s.n1:c.s.n2;
+  const post=j/tot;
+  return {type:'num',prompt:`<b>Bayes Flip.</b> ${c.text}<br>One of the ${c.s.items} shows the event (<b>${c.s.ev.toLowerCase()}</b>). Using Bayes' theorem, compute P(<b>${name}</b> | event). (3 decimals)`,
+    stage:svgTree({n1:c.s.n1,n2:c.s.n2,ev:c.s.ev,ok:c.s.ok,pr:c.pr,cA:c.cA,cB:c.cB,showJoint:[true,true,true,true],highlight:[which===1?0:2]}),
+    answer:+post.toFixed(3),tol:0.002,hint:'Posterior = joint of that path ÷ total probability of the event.',
+    why:`P = ${p2(j)}/${p2(tot)} = ${post.toFixed(3)}: the share of the total event probability that flows through ${name}.`};
+}
+function gThousand(){
+  const c=setup();
+  const nA=Math.round(c.pr*1000), nB=1000-nA;
+  const dA=Math.round(nA*c.cA), dB=Math.round(nB*c.cB);
+  const kind=pick(['countA','countTot','share']);
+  if(kind==='countA') return {type:'num',prompt:`<b>Thousand Check.</b> ${c.text}<br>Imagine exactly <b>1,000</b> ${c.s.items}. How many come from <b>${c.s.n1}</b> AND show the event?`,
+    answer:dA,hint:`${c.s.n1} makes ${nA} of the 1,000; take its event rate of those.`,
+    why:`${c.s.n1}: ${p2(c.pr)} × 1,000 = ${nA} ${c.s.items}; of these, ${p2(c.cA*100)}% show the event: ${dA}.`};
+  if(kind==='countTot') return {type:'num',prompt:`<b>Thousand Check.</b> ${c.text}<br>Imagine exactly <b>1,000</b> ${c.s.items}. How many show the event in TOTAL?`,
+    answer:dA+dB,hint:'Count the event cases of each source, then add.',
+    why:`${c.s.n1}: ${dA}; ${c.s.n2}: ${dB}; total ${dA+dB} of the 1,000. (Divide by 1,000 and you have P(event).)`};
+  const post=dA/(dA+dB);
+  return {type:'num',prompt:`<b>Thousand Check.</b> ${c.text}<br>Of 1,000 ${c.s.items}, ${c.s.n1} produces <b>${dA}</b> event cases and ${c.s.n2} produces <b>${dB}</b>. One event case is picked.<br>P(it came from <b>${c.s.n1}</b>)? (3 decimals)`,
+    answer:+post.toFixed(3),tol:0.002,hint:'Just count: cases from the source ÷ all cases.',
+    why:`${dA}/${dA+dB} = ${post.toFixed(3)}: Bayes' theorem is exactly this counting, written as a formula.`};
+}
+const MODES=[
+ {name:'Grow the Tree',icon:'🌱',desc:'Joint probabilities: multiply prior × conditional along the path.',count:8,gen:[gJoint]},
+ {name:'Total Collector',icon:'🧺',desc:'The total probability of the event: add the paths.',count:8,gen:[gTotal]},
+ {name:'Bayes Flip',icon:'🔁',desc:'Reverse the condition: posterior = joint ÷ total.',count:8,gen:[gBayes]},
+ {name:'Thousand Check',icon:'🔢',desc:'The no-formula route: count 1,000 cases and read the answer.',count:8,gen:[gThousand]},
+ {name:'Full Challenge',icon:'🏆',desc:'Fifteen mixed questions from all the rounds.',count:15,gen:[gJoint,gTotal,gBayes,gThousand]},
+];
+
+// ---------------- engine ----------------
+let deck=[],idx=0,score=0,streak=0,best=0,answered=false,log=[],roundTitle='';
+function buildMenu(){
+  $('modeCards').innerHTML=MODES.map((m,i)=>`<div class="mode" onclick="start(${i})"><h3>${m.icon} ${m.name}</h3><p>${m.desc}</p></div>`).join('');
+}
+function start(i){
+  const m=MODES[i]; roundTitle=m.name;
+  deck=[]; const gens=m.gen;
+  for(let k=0;k<m.count;k++) deck.push(pick(gens)());
+  idx=0;score=0;streak=0;best=0;log=[];
+  $('menu').style.display='none';$('results').style.display='none';$('game').style.display='block';
+  $('roundName').textContent=m.name; show();
+}
+function menu(){$('game').style.display='none';$('results').style.display='none';$('menu').style.display='block'}
+function show(){
+  const c=deck[idx]; answered=false; $('fb').className='feedback'; $('nextBtn').disabled=true; $('nextBtn').textContent='Next ▶';
+  $('caseNo').textContent=(idx+1)+' / '+deck.length; $('score').textContent=score; $('streak').textContent=streak;
+  $('bar').style.width=(idx/deck.length*100)+'%';
+  $('prompt').innerHTML=c.prompt; $('stage').innerHTML=c.stage||'';
+  if(c.type==='num'){
+    $('answerArea').innerHTML=`<div class="numin"><input id="numAns" type="number" step="any" placeholder="Your answer" onkeydown="if(event.key==='Enter')checkNum()"> ${c.unit||''} <button class="btn" onclick="checkNum()">Check</button></div><div class="hint">${c.hint||''}</div>`;
+    setTimeout(()=>$('numAns').focus(),50);
+  } else {
+    $('answerArea').innerHTML='<div class="opts">'+c.opts.map((op,i)=>`<div class="opt" onclick="answerMC(${i})"><span class="lbl">${'ABCD'[i]}</span>${op.html}</div>`).join('')+'</div>';
+  }
+}
+function grade(ok,mineTxt,correctTxt,why){
+  answered=true; const c=deck[idx];
+  if(ok){score+=1+(streak>=3?1:0);streak++;best=Math.max(best,streak);
+    $('fb').className='feedback ok';$('fb').innerHTML='✅ <b>Correct.</b> '+why+(streak>=3?' <em>Streak bonus +1!</em>':'');}
+  else{streak=0;$('fb').className='feedback bad';$('fb').innerHTML='❌ <b>Not quite.</b> The answer is <b>'+correctTxt+'</b>. '+why;}
+  log.push({q:c.prompt,correct:correctTxt,mine:mineTxt,ok});
+  $('score').textContent=score;$('streak').textContent=streak;
+  $('nextBtn').disabled=false;$('nextBtn').textContent=idx+1>=deck.length?'Finish ▶':'Next ▶';
+}
+function checkNum(){
+  if(answered)return; const c=deck[idx]; const v=parseFloat($('numAns').value);
+  if(isNaN(v)){$('fb').className='feedback bad';$('fb').innerHTML='Type a number first.';return}
+  const ok=Math.abs(v-c.answer)<=(c.tol!==undefined?c.tol:0.011);
+  grade(ok,fmt(v),fmt(c.answer),c.why);
+}
+function answerMC(i){
+  if(answered)return; const c=deck[idx];
+  const els=[...document.querySelectorAll('.opt')];
+  els[i].classList.add(c.opts[i].ok?'right':'wrong');
+  els[c.opts.findIndex(o=>o.ok)].classList.add('right');
+  grade(c.opts[i].ok, c.opts[i].html.replace(/<[^>]+>/g,''), c.opts.find(o=>o.ok).html.replace(/<[^>]+>/g,''), c.why);
+}
+function next(){idx++; if(idx>=deck.length){finish();return} show()}
+function finish(){
+  $('game').style.display='none';$('results').style.display='block';
+  const n=deck.length,right=log.filter(l=>l.ok).length,p=right/n;
+  $('badge').textContent=p>=.9?'🏆':p>=.7?'🥈':p>=.5?'🥉':'📘';
+  $('summary').innerHTML=`<b>${roundTitle}</b>: you solved <b>${right}</b> of ${n} (score ${score}, best streak ${best}). `+(p>=.9?'Excellent!':p>=.7?'Good. Check the review below.':'Keep practising: read the worked answers below, then play again.');
+  $('review').querySelector('tbody').innerHTML=log.map((l,i)=>`<tr><td>${i+1}. ${l.q.replace(/<[^>]+>/g,'').slice(0,90)}…</td><td>${l.correct}</td><td style="color:${l.ok?'#1f9d55':'#d64545'}">${l.ok?'✔':'✘'} ${l.mine}</td></tr>`).join('');
+}
+buildMenu();
+</script>
+</body>
+</html>

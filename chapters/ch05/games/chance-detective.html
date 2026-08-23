@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QUA107 · Chapter 5 · Chance Detective</title>
+<style>
+  @font-face{font-family:'SaudiRiyal';src:url(data:font/woff2;base64,d09GMgABAAAAAALQAA0AAAAABmAAAAJ8AAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP0ZGVE0cBmAAgkIIBBEICoFkgV4LCgABNgIkAxAEIAWEEAcqG2sFII7RS88cU5STILSS4qFvjPZnd860iVlEzJpYwjMh8YiUTIsk9dBOfHC/9vZR7+OS2G6oe1PNYtZcG1UbGepdnMqJRTj3AJ5FY9IAWgKhiIR0DlyzXIEKVaimFaxBzV0T+RGsse4hpRCTEPDx7aMa4OvPoMk4KXhL5vMY1UB5WY7wil40PlkLgaKhBUABgAsPAvLRij/+VKpxllpFuEEAYBRBRcUgAvbQEhikbRSkFPizq/H1u30IEI2sryggfgshfVNFTx8rLSB2NQSQoBmJNXAYQDuWCaBkNk4Y6XTktbJn66O7M6vZ83ezSbxW6/iVzez5jTxCeJLW5XmBbCPHw3SOjRmM/aS3ybfKobiYoLQuJ4d9mS3vxTZN5kOO0ZFJEq+07kG3XgPntIZf9fzh+Y8wzef6vKPRKbX7JysP29JgDtzada0fVbRLsLJnT0/b//VdXZ13HKYlGNjVkqA6hFzTjS0WI8JbgyB4PZu6cdPM/a/ZqP4asvyY8r8A0KyAoI5rXKVmLVA/CQBA5nO2QD6HfC4bQZojgIIQOEAJoNMbBKCPPQJCizsIKJq8QEA15U2A1BKtAjToik0Q0KglbtAS2YJ1YCH0ioSi00OoTumE1OsfGgyH9ec06g1/fqpUa1GrRJFi9SixPBIUx3AO5KgctQoUq4Cvgap5kpe0nMqpLSiuAK6qVK9EvXIF8nG4+niyKc7nwCUFijQoVyjgGjQHOKaqK1XVaxUFhAZTYihXVDEjcnPOFDgFWBa7OYmiobaogHIlo64UAMna3FnBFYg9QUWuObXqlEDTKZbhakpMwBLNZEytZMmTwscLsHtoHQQAgDxlyT4H) format('woff2')}
+  :root{--blue:#008DC3;--blue-dark:#0075A3;--grey:#748995;--cream:#E3E0D2;--ink:#1d2731;--ok:#1f9d55;--bad:#d64545;--card:#ffffff}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--cream);color:var(--ink);line-height:1.4}
+  header{background:var(--blue);color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  header h1{margin:0;font-size:1.25rem;letter-spacing:.2px}
+  header .sub{font-size:.85rem;opacity:.9}
+  header a{color:inherit}
+  .sar{font-family:'SaudiRiyal',sans-serif;font-style:normal}
+  .wrap{max-width:1000px;margin:0 auto;padding:18px}
+  .hud{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+  .stat{background:var(--card);border-radius:12px;padding:10px 14px;min-width:110px;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+  .stat .lbl{font-size:.72rem;color:var(--grey);text-transform:uppercase;letter-spacing:.06em}
+  .stat .val{font-size:1.4rem;font-weight:700;color:var(--blue-dark)}
+  .panel{background:var(--card);border-radius:16px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.08);margin-bottom:16px}
+  .btn{background:var(--blue);color:#fff;border:0;border-radius:999px;padding:10px 20px;font-size:1rem;cursor:pointer;font-weight:600}
+  .btn:hover{background:var(--blue-dark)}
+  .btn.ghost{background:transparent;color:var(--blue-dark);border:2px solid var(--blue)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+  .mode{border:2px solid #e2e6ea;border-radius:14px;padding:16px;cursor:pointer;transition:.15s;background:#fff}
+  .mode:hover{border-color:var(--blue);transform:translateY(-2px)}
+  .mode h3{margin:0 0 6px;color:var(--blue-dark)}
+  .mode p{margin:0;font-size:.92rem;color:#445}
+  .hint{font-size:.9rem;color:var(--grey)}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+  table{border-collapse:collapse;font-size:.95rem;margin:8px 0}
+  th,td{border:1px solid #e2e6ea;padding:6px 10px;text-align:center}
+  th{background:#eef5f8;color:var(--blue-dark)}
+  .prompt{font-size:1.06rem;margin:0 0 10px}
+  .data{font-family:Consolas,Menlo,monospace;background:#f4f6f2;border:1px solid #e2e6ea;border-radius:10px;padding:10px 12px;font-size:1.05rem;letter-spacing:.03em;display:inline-block;margin:4px 0 10px}
+  .opts{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
+  .opt{border:2px solid #e2e6ea;border-radius:12px;padding:10px 12px;cursor:pointer;background:#fff;font-size:1rem;text-align:left}
+  .opt .lbl{display:inline-block;background:#eef5f8;color:var(--blue-dark);font-weight:700;border-radius:6px;padding:1px 8px;margin-right:8px}
+  .opt:hover{border-color:var(--blue)}
+  .opt.right{border-color:var(--ok);background:#f0faf4}
+  .opt.wrong{border-color:var(--bad);background:#fdf3f3}
+  .numin{display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap}
+  .numin input{font-size:1.15rem;padding:9px 12px;border:2px solid #cfd8de;border-radius:10px;width:170px}
+  .numin input:focus{outline:none;border-color:var(--blue)}
+  .feedback{display:none;border-radius:12px;padding:12px 14px;margin-top:12px;font-size:.98rem}
+  .feedback.ok{display:block;background:#f0faf4;border:1px solid var(--ok)}
+  .feedback.bad{display:block;background:#fdf3f3;border:1px solid var(--bad)}
+  .barwrap{height:8px;background:#dfe5e9;border-radius:99px;margin:10px 0 16px;overflow:hidden}
+  #bar{height:100%;width:0;background:var(--blue);transition:width .3s}
+  #results .badge{font-size:3rem}
+  #review td:first-child{text-align:left}
+  footer{text-align:center;color:var(--grey);font-size:.8rem;padding:14px}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>🕵️ Chance Detective</h1><div class="sub">QUA 107 · Chapter 5 · Probability concepts and approaches (LO 5.1)</div></div>
+  <div class="sub" style="text-align:right">King Saud University · College of Business Administration<br><a href="../../../index.html">QUA 107 course page</a> · <a href="../slides.html">Chapter 5 slides</a></div>
+</header>
+<div class="wrap">
+  <div id="menu">
+    <div class="panel"><p class="prompt"><b>Choose a round.</b> Every play generates new numbers, so you can practise as often as you like. Rounds cover the key terms, the three approaches, classical probability and the counting tools.</p>
+      <div class="modes" id="modeCards"></div>
+    </div>
+  </div>
+  <div id="game" style="display:none">
+    <div class="hud">
+      <div class="stat"><div class="lbl">Question</div><div class="val" id="caseNo">1</div></div>
+      <div class="stat"><div class="lbl">Score</div><div class="val" id="score">0</div></div>
+      <div class="stat"><div class="lbl">Streak</div><div class="val" id="streak">0</div></div>
+      <div class="stat" style="flex:1"><div class="lbl">Round</div><div class="val" id="roundName" style="font-size:1.05rem;padding-top:6px"></div></div>
+    </div>
+    <div class="barwrap"><div id="bar"></div></div>
+    <div class="panel">
+      <p class="prompt" id="prompt"></p>
+      <div id="stage"></div>
+      <div id="answerArea"></div>
+      <div class="feedback" id="fb"></div>
+      <div class="row" style="margin-top:14px">
+        <button class="btn ghost" onclick="menu()">◀ Rounds</button>
+        <button class="btn" id="nextBtn" onclick="next()" disabled>Next ▶</button>
+      </div>
+    </div>
+  </div>
+  <div id="results" style="display:none">
+    <div class="panel" style="text-align:center">
+      <div class="badge" id="badge"></div>
+      <p class="prompt" id="summary"></p>
+      <button class="btn" onclick="menu()">Play another round</button>
+    </div>
+    <div class="panel"><b>Review</b>
+      <table id="review" style="width:100%"><thead><tr><th>Question</th><th>Correct answer</th><th>Your answer</th></tr></thead><tbody></tbody></table>
+    </div>
+  </div>
+</div>
+<footer>QUA 107 · Introduction to Business Statistics · Practice game (not graded).</footer>
+<script>
+const $=id=>document.getElementById(id);
+const RY='<span class="sar">ê</span>';
+function ri(a,b){return a+Math.floor(Math.random()*(b-a+1))}
+function pick(a){return a[Math.floor(Math.random()*a.length)]}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function sampleDistinct(n,lo,hi){const s=new Set();while(s.size<n)s.add(ri(lo,hi));return [...s]}
+function fmt(x){return Math.abs(x-Math.round(x))<1e-9?String(Math.round(x)):x.toFixed(2).replace(/0$/,'').replace(/\\.$/,'')}
+function mean(a){return a.reduce((s,v)=>s+v,0)/a.length}
+function median(a){const s=a.slice().sort((x,y)=>x-y),n=s.length;return n%2?s[(n-1)/2]:(s[n/2-1]+s[n/2])/2}
+function dataBox(a){return '<div class="data">'+a.join(', ')+'</div>'}
+function sortedTable(a){let h='<tr><th>Position</th>'+a.map((_,i)=>'<th>'+(i+1)+'</th>').join('')+'</tr>';let r='<tr><td><b>Value</b></td>'+a.map(v=>'<td>'+v+'</td>').join('')+'</tr>';return '<table>'+h+r+'</table>'}
+
+
+const INKC='#0B5F86', BLUEC='#008DC3', GREYC='#748995';
+function p2(x){return (Math.round(x*10000)/10000).toString()}
+function svgTree(o){
+  // o: {n1,n2,ev,ok,pr,cA,cB, showJoint:[bool per leaf], hide:'pr'|'cA'|... , highlight:[0,2]}
+  const W=560,H=250,x0=20,x1=200,x2=400,xj=480;
+  const yR=125,y1=[65,185],y2=[35,95,155,215];
+  const pB=+(1-o.pr).toFixed(2), gA=+(1-o.cA).toFixed(2), gB=+(1-o.cB).toFixed(2);
+  const labs=[o.pr,pB], conds=[o.cA,gA,o.cB,gB];
+  const joints=[o.pr*o.cA,o.pr*gA,pB*o.cB,pB*gB];
+  const names2=[o.ev,o.ok,o.ev,o.ok];
+  let g='';
+  for(let i=0;i<2;i++){
+    g+=`<line x1="${x0+8}" y1="${yR}" x2="${x1-8}" y2="${y1[i]}" stroke="${INKC}" stroke-width="2"/>`;
+    const mx=(x0+x1)/2, my=(yR+y1[i])/2;
+    g+=`<text x="${mx}" y="${my+(i?16:-8)}" font-size="12" font-weight="bold" fill="${INKC}" text-anchor="middle">${o.hide==='pr'&&i===0?'?':p2(labs[i])}</text>`;
+    g+=`<circle cx="${x1}" cy="${y1[i]}" r="7" fill="#fff" stroke="${INKC}" stroke-width="2.5"/>`;
+    g+=`<text x="${x1}" y="${y1[i]-12}" font-size="12" fill="${INKC}" text-anchor="middle">${i===0?o.n1:o.n2}</text>`;
+  }
+  for(let k=0;k<4;k++){
+    const i=k<2?0:1;
+    const hot=(o.highlight||[]).includes(k);
+    const col=hot?BLUEC:INKC;
+    g+=`<line x1="${x1+8}" y1="${y1[i]}" x2="${x2-8}" y2="${y2[k]}" stroke="${col}" stroke-width="${hot?2.6:1.8}"/>`;
+    const mx=(x1+x2)/2, my=(y1[i]+y2[k])/2;
+    const ht=(o.hide==='cA'&&k===0)||(o.hide==='cB'&&k===2)?'?':p2(conds[k]);
+    g+=`<text x="${mx}" y="${my+(k%2?15:-7)}" font-size="12" font-weight="bold" fill="${col}" text-anchor="middle">${ht}</text>`;
+    g+=`<circle cx="${x2}" cy="${y2[k]}" r="6" fill="#fff" stroke="${col}" stroke-width="2.2"/>`;
+    g+=`<text x="${x2+12}" y="${y2[k]+4}" font-size="12" fill="${col}">${names2[k]}</text>`;
+    if(o.showJoint&&o.showJoint[k]) g+=`<text x="${xj+42}" y="${y2[k]+4}" font-size="12" font-weight="bold" fill="${col}" text-anchor="middle">${p2(joints[k])}</text>`;
+    else if(o.showJoint) g+=`<text x="${xj+42}" y="${y2[k]+4}" font-size="13" font-weight="bold" fill="${GREYC}" text-anchor="middle">?</text>`;
+  }
+  return `<svg viewBox="0 0 ${W} ${H}" style="max-width:560px;width:100%;background:#fff;border:1px solid #e2e6ea;border-radius:10px">${g}</svg>`;
+}
+
+const EXPS=[
+ {exp:'a customer orders one drink from a menu of 12 drinks', out:'the customer orders an Ice Latte', ev:'the customer orders a cold drink', ss:'the list of all 12 drinks on the menu'},
+ {exp:'observing the colour of the traffic light on the way to KSU', out:'the light is red', ev:'the light is not green', ss:'{Red, Yellow, Green}'},
+ {exp:'one shopper pays at a kiosk', out:'the shopper pays with Apple Pay', ev:'the shopper pays without cash', ss:'{Cash, Card, Apple Pay, Tabby}'},
+ {exp:'rolling one fair dice', out:'the dice shows a 4', ev:'the dice shows an even number', ss:'{1, 2, 3, 4, 5, 6}'},
+ {exp:'one caller reaches a call centre', out:'the call is about billing', ev:'the call is about anything except coverage', ss:'the list of all call topics'},
+];
+function gTerm(){
+  const s=pick(EXPS);
+  const which=pick(['exp','out','ev','ss']);
+  const NAME={exp:'the experiment',out:'an outcome',ev:'an event (more than one outcome)',ss:'the sample space'};
+  const VAL={exp:s.exp,out:s.out,ev:s.ev,ss:s.ss};
+  const others=shuffle(['exp','out','ev','ss'].filter(k=>k!==which)).slice(0,3);
+  const opts=shuffle([{html:VAL[which],ok:true}].concat(others.map(k=>({html:VAL[k],ok:false}))));
+  return {type:'mc',prompt:`<b>Term Match.</b> The experiment: <b>${s.exp}</b>.<br>Which of these is <b>${NAME[which]}</b>?`,
+    opts,why:`Experiment = the activity; outcome = ONE result; event = a GROUP of outcomes; sample space = ALL outcomes. Here ${NAME[which]} is: ${VAL[which]}.`};
+}
+function gApproach(){
+  const S=[
+   ['You draw one name from a bowl of 40 identical entry forms.','Classical','equally likely outcomes: count favorable over total'],
+   ['The chance of Heads on a fair coin is 1/2.','Classical','two equally likely sides'],
+   ['You pick one date from a box of 30 Sukkari and 20 Khalas without looking.','Classical','every date has the same chance'],
+   ['A lottery machine picks one of 45 numbered balls.','Classical','all 45 balls are equally likely'],
+   ['Records show 5% of new customers call support in their first month.','Empirical','the probability is a fraction of PAST data'],
+   ['Of the last 500 laptop buyers, 100 bought the protection plan, so the manager uses 20%.','Empirical','100/500 from company records'],
+   ['Last season 92% of orders arrived on time; the analyst uses 0.92 for next week.','Empirical','based on last season’s observations'],
+   ['An airline uses last year’s data: 18% of passengers bought extra baggage.','Empirical','the fraction comes from past records'],
+   ['A NEOM project manager believes phase one finishes by 2030 with probability 0.8.','Subjective','no equal outcomes, no past data: expert judgment'],
+   ['An analyst says there is a 70% chance oil prices rise next month.','Subjective','an expert’s belief about a one-time future event'],
+   ['A student feels 90% sure of passing the exam.','Subjective','personal belief, not data'],
+   ['An entrepreneur estimates a 60% chance her cafe succeeds in year one.','Subjective','an educated guess about a unique situation'],
+  ];
+  const [d,a,r]=pick(S);
+  const others=['Classical','Empirical','Subjective'].filter(x=>x!==a);
+  const opts=shuffle([{html:a+' probability',ok:true},{html:others[0]+' probability',ok:false},{html:others[1]+' probability',ok:false},{html:'Conditional probability',ok:false}]);
+  return {type:'mc',prompt:`<b>Approach Analyst.</b> ${d}<br>Which approach to probability is this?`,
+    opts,why:`${a}: ${r}. Ask in order: equally likely? Then classical. Past data? Then empirical. Neither? Subjective.`};
+}
+const ITEMS=[['dates','Sukkari','Khalas'],['shemaghs','white','red'],['juice boxes','orange','apple'],['pens','blue','black'],['gift cards','Jarir','Noon'],['cupcakes','chocolate','vanilla']];
+function gClassical(){
+  const [it,kA,kB]=pick(ITEMS);
+  const a=pick([10,12,15,18,20,24,30]), b=pick([10,15,20,25,30]);
+  const tot=a+b;
+  const kind=pick(['direct','direct','not']);
+  const ans=kind==='direct'? a/tot : b/tot;
+  const what=kind==='direct'? kA : ('NOT '+kA);
+  return {type:'num',prompt:`<b>Classical Counts.</b> A box holds <b>${a} ${kA}</b> and <b>${b} ${kB}</b> ${it} (${tot} total). You pick one without looking.<br>What is P(the ${it.replace(/s$/,'')} is <b>${what}</b>)? (2 decimals)`,
+    answer:+ans.toFixed(2),tol:0.006,hint:'Favorable outcomes ÷ total outcomes.',
+    why:kind==='direct'?`P(${kA}) = ${a}/${tot} = ${ans.toFixed(2)}.`:`P(not ${kA}) = ${b}/${tot} = ${ans.toFixed(2)} (or 1 − ${(a/tot).toFixed(2)}).`};
+}
+function gMult(){
+  const S=[['thobe colours','shemagh patterns','outfits'],['sandwich types','drink choices','meals'],['phone models','case colours','combinations'],['shirt sizes','shirt colours','different shirts'],['appetizers','main dishes','two-course meals']];
+  const [a,b,w]=pick(S);
+  if(Math.random()<0.3){
+    const m=ri(2,4), n=ri(2,4), k=ri(2,3);
+    return {type:'num',prompt:`<b>Outfit Multiplier.</b> A menu offers <b>${m} ${a}</b>, <b>${n} ${b}</b> and <b>${k} dessert choices</b>. You pick one of each.<br>How many different combinations are possible?`,
+      answer:m*n*k,hint:'Multiply the number of ways of every choice.',
+      why:`${m} × ${n} × ${k} = ${m*n*k}: the multiplication formula extends to any number of choices.`};
+  }
+  const m=ri(2,7), n=ri(2,6);
+  return {type:'num',prompt:`<b>Outfit Multiplier.</b> A store offers <b>${m} ${a}</b> and <b>${n} ${b}</b>. You choose one of each.<br>How many different ${w} are possible?`,
+    answer:m*n,hint:'m ways × n ways.',
+    why:`${m} × ${n} = ${m*n} ${w}: for every first choice there are ${n} second choices.`};
+}
+function fact(n){let f=1;for(let i=2;i<=n;i++)f*=i;return f}
+function gOrder(){
+  const kind=pick(['decide','perm','comb','fact']);
+  if(kind==='fact'){
+    const n=ri(3,6);
+    return {type:'num',prompt:`<b>Order Order.</b> In how many different orders can <b>${n}</b> products be lined up on one shelf?`,
+      answer:fact(n),hint:'All n items in order: n!',
+      why:`${n}! = ${Array.from({length:n},(_,i)=>n-i).join(' × ')} = ${fact(n)}.`};
+  }
+  if(kind==='perm'){
+    const n=ri(5,9), k=pick([2,3]);
+    const ans=fact(n)/fact(n-k);
+    return {type:'num',prompt:`<b>Order Order.</b> From <b>${n}</b> board members, elect a <b>President and a Vice-President</b>${k===3?' and a Treasurer':''} (${k} different positions).<br>How many ways?`,
+      answer:ans,hint:'Order matters: P(n, k) = n!/(n − k)!.',
+      why:`P(${n}, ${k}) = ${Array.from({length:k},(_,i)=>n-i).join(' × ')} = ${ans}: ${k} shrinking choices, multiplied.`};
+  }
+  if(kind==='comb'){
+    const n=pick([6,7,8,9,10]), k=pick([2,3]);
+    const ans=fact(n)/(fact(k)*fact(n-k));
+    return {type:'num',prompt:`<b>Order Order.</b> From <b>${n}</b> engineers, choose a project team of <b>${k}</b> (all members equal).<br>How many different teams?`,
+      answer:ans,hint:'Order does not matter: C(n, k) = n!/(k!(n − k)!).',
+      why:`C(${n}, ${k}) = ${ans}: divide the ordered count by ${k}! to remove repeated orderings of the same team.`};
+  }
+  const S=[
+   ['Choosing a 1st and a 2nd prize winner from 12 entries','Permutation'],
+   ['Choosing 2 winners who get the same prize','Combination'],
+   ['Awarding gold, silver and bronze to 3 of 8 runners','Permutation'],
+   ['Picking 3 books to take on a trip','Combination'],
+   ['Setting the visiting order of 4 clients','Permutation'],
+   ['Selecting 5 colleagues for a dinner invitation','Combination'],
+   ['Creating a 4-digit code from 4 different digits','Permutation'],
+   ['Choosing 3 flavours for a mixed juice box','Combination']];
+  const [d,a]=pick(S);
+  const opts=shuffle([
+    {html:a+(a==='Permutation'?': order matters':': order does not matter'),ok:true},
+    {html:(a==='Permutation'?'Combination: order does not matter':'Permutation: order matters'),ok:false},
+    {html:'The multiplication formula of two choices',ok:false},
+    {html:'Neither: this is empirical probability',ok:false}]);
+  return {type:'mc',prompt:`<b>Order Order.</b> ${d}.<br>Which counting tool is this?`,
+    opts,why:'One question decides: does the order of selection change the result? Different positions/ranks = permutation; identical roles = combination.'};
+}
+const MODES=[
+ {name:'Term Match',icon:'🔤',desc:'Experiment, outcome, event, sample space: match the words to real situations.',count:8,gen:[gTerm]},
+ {name:'Approach Analyst',icon:'🧠',desc:'Classical, empirical or subjective? Classify real probabilities.',count:8,gen:[gApproach]},
+ {name:'Classical Counts',icon:'🎯',desc:'Favorable over total: compute classical probabilities.',count:8,gen:[gClassical]},
+ {name:'Outfit Multiplier',icon:'👔',desc:'The multiplication formula: combine the choices.',count:8,gen:[gMult]},
+ {name:'Order Order',icon:'🥇',desc:'Factorials, permutations and combinations, plus the order-matters decision.',count:8,gen:[gOrder]},
+ {name:'Full Challenge',icon:'🏆',desc:'Fifteen mixed questions from all the rounds.',count:15,gen:[gTerm,gApproach,gClassical,gMult,gOrder]},
+];
+
+// ---------------- engine ----------------
+let deck=[],idx=0,score=0,streak=0,best=0,answered=false,log=[],roundTitle='';
+function buildMenu(){
+  $('modeCards').innerHTML=MODES.map((m,i)=>`<div class="mode" onclick="start(${i})"><h3>${m.icon} ${m.name}</h3><p>${m.desc}</p></div>`).join('');
+}
+function start(i){
+  const m=MODES[i]; roundTitle=m.name;
+  deck=[]; const gens=m.gen;
+  for(let k=0;k<m.count;k++) deck.push(pick(gens)());
+  idx=0;score=0;streak=0;best=0;log=[];
+  $('menu').style.display='none';$('results').style.display='none';$('game').style.display='block';
+  $('roundName').textContent=m.name; show();
+}
+function menu(){$('game').style.display='none';$('results').style.display='none';$('menu').style.display='block'}
+function show(){
+  const c=deck[idx]; answered=false; $('fb').className='feedback'; $('nextBtn').disabled=true; $('nextBtn').textContent='Next ▶';
+  $('caseNo').textContent=(idx+1)+' / '+deck.length; $('score').textContent=score; $('streak').textContent=streak;
+  $('bar').style.width=(idx/deck.length*100)+'%';
+  $('prompt').innerHTML=c.prompt; $('stage').innerHTML=c.stage||'';
+  if(c.type==='num'){
+    $('answerArea').innerHTML=`<div class="numin"><input id="numAns" type="number" step="any" placeholder="Your answer" onkeydown="if(event.key==='Enter')checkNum()"> ${c.unit||''} <button class="btn" onclick="checkNum()">Check</button></div><div class="hint">${c.hint||''}</div>`;
+    setTimeout(()=>$('numAns').focus(),50);
+  } else {
+    $('answerArea').innerHTML='<div class="opts">'+c.opts.map((op,i)=>`<div class="opt" onclick="answerMC(${i})"><span class="lbl">${'ABCD'[i]}</span>${op.html}</div>`).join('')+'</div>';
+  }
+}
+function grade(ok,mineTxt,correctTxt,why){
+  answered=true; const c=deck[idx];
+  if(ok){score+=1+(streak>=3?1:0);streak++;best=Math.max(best,streak);
+    $('fb').className='feedback ok';$('fb').innerHTML='✅ <b>Correct.</b> '+why+(streak>=3?' <em>Streak bonus +1!</em>':'');}
+  else{streak=0;$('fb').className='feedback bad';$('fb').innerHTML='❌ <b>Not quite.</b> The answer is <b>'+correctTxt+'</b>. '+why;}
+  log.push({q:c.prompt,correct:correctTxt,mine:mineTxt,ok});
+  $('score').textContent=score;$('streak').textContent=streak;
+  $('nextBtn').disabled=false;$('nextBtn').textContent=idx+1>=deck.length?'Finish ▶':'Next ▶';
+}
+function checkNum(){
+  if(answered)return; const c=deck[idx]; const v=parseFloat($('numAns').value);
+  if(isNaN(v)){$('fb').className='feedback bad';$('fb').innerHTML='Type a number first.';return}
+  const ok=Math.abs(v-c.answer)<=(c.tol!==undefined?c.tol:0.011);
+  grade(ok,fmt(v),fmt(c.answer),c.why);
+}
+function answerMC(i){
+  if(answered)return; const c=deck[idx];
+  const els=[...document.querySelectorAll('.opt')];
+  els[i].classList.add(c.opts[i].ok?'right':'wrong');
+  els[c.opts.findIndex(o=>o.ok)].classList.add('right');
+  grade(c.opts[i].ok, c.opts[i].html.replace(/<[^>]+>/g,''), c.opts.find(o=>o.ok).html.replace(/<[^>]+>/g,''), c.why);
+}
+function next(){idx++; if(idx>=deck.length){finish();return} show()}
+function finish(){
+  $('game').style.display='none';$('results').style.display='block';
+  const n=deck.length,right=log.filter(l=>l.ok).length,p=right/n;
+  $('badge').textContent=p>=.9?'🏆':p>=.7?'🥈':p>=.5?'🥉':'📘';
+  $('summary').innerHTML=`<b>${roundTitle}</b>: you solved <b>${right}</b> of ${n} (score ${score}, best streak ${best}). `+(p>=.9?'Excellent!':p>=.7?'Good. Check the review below.':'Keep practising: read the worked answers below, then play again.');
+  $('review').querySelector('tbody').innerHTML=log.map((l,i)=>`<tr><td>${i+1}. ${l.q.replace(/<[^>]+>/g,'').slice(0,90)}…</td><td>${l.correct}</td><td style="color:${l.ok?'#1f9d55':'#d64545'}">${l.ok?'✔':'✘'} ${l.mine}</td></tr>`).join('');
+}
+buildMenu();
+</script>
+</body>
+</html>
