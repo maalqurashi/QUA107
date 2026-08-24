@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QUA107 · Chapter 7 · Shuttle Wait</title>
+<style>
+  @font-face{font-family:'SaudiRiyal';src:url(data:font/woff2;base64,d09GMgABAAAAAALQAA0AAAAABmAAAAJ8AAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP0ZGVE0cBmAAgkIIBBEICoFkgV4LCgABNgIkAxAEIAWEEAcqG2sFII7RS88cU5STILSS4qFvjPZnd860iVlEzJpYwjMh8YiUTIsk9dBOfHC/9vZR7+OS2G6oe1PNYtZcG1UbGepdnMqJRTj3AJ5FY9IAWgKhiIR0DlyzXIEKVaimFaxBzV0T+RGsse4hpRCTEPDx7aMa4OvPoMk4KXhL5vMY1UB5WY7wil40PlkLgaKhBUABgAsPAvLRij/+VKpxllpFuEEAYBRBRcUgAvbQEhikbRSkFPizq/H1u30IEI2sryggfgshfVNFTx8rLSB2NQSQoBmJNXAYQDuWCaBkNk4Y6XTktbJn66O7M6vZ83ezSbxW6/iVzez5jTxCeJLW5XmBbCPHw3SOjRmM/aS3ybfKobiYoLQuJ4d9mS3vxTZN5kOO0ZFJEq+07kG3XgPntIZf9fzh+Y8wzef6vKPRKbX7JysP29JgDtzada0fVbRLsLJnT0/b//VdXZ13HKYlGNjVkqA6hFzTjS0WI8JbgyB4PZu6cdPM/a/ZqP4asvyY8r8A0KyAoI5rXKVmLVA/CQBA5nO2QD6HfC4bQZojgIIQOEAJoNMbBKCPPQJCizsIKJq8QEA15U2A1BKtAjToik0Q0KglbtAS2YJ1YCH0ioSi00OoTumE1OsfGgyH9ec06g1/fqpUa1GrRJFi9SixPBIUx3AO5KgctQoUq4Cvgap5kpe0nMqpLSiuAK6qVK9EvXIF8nG4+niyKc7nwCUFijQoVyjgGjQHOKaqK1XVaxUFhAZTYihXVDEjcnPOFDgFWBa7OYmiobaogHIlo64UAMna3FnBFYg9QUWuObXqlEDTKZbhakpMwBLNZEytZMmTwscLsHtoHQQAgDxlyT4H) format('woff2')}
+  :root{--blue:#008DC3;--blue-dark:#0075A3;--grey:#748995;--cream:#E3E0D2;--ink:#1d2731;--ok:#1f9d55;--bad:#d64545;--card:#ffffff}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--cream);color:var(--ink);line-height:1.4}
+  header{background:var(--blue);color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  header h1{margin:0;font-size:1.25rem;letter-spacing:.2px}
+  header .sub{font-size:.85rem;opacity:.9}
+  header a{color:inherit}
+  .sar{font-family:'SaudiRiyal',sans-serif;font-style:normal}
+  .wrap{max-width:1000px;margin:0 auto;padding:18px}
+  .hud{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+  .stat{background:var(--card);border-radius:12px;padding:10px 14px;min-width:110px;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+  .stat .lbl{font-size:.72rem;color:var(--grey);text-transform:uppercase;letter-spacing:.06em}
+  .stat .val{font-size:1.4rem;font-weight:700;color:var(--blue-dark)}
+  .panel{background:var(--card);border-radius:16px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.08);margin-bottom:16px}
+  .btn{background:var(--blue);color:#fff;border:0;border-radius:999px;padding:10px 20px;font-size:1rem;cursor:pointer;font-weight:600}
+  .btn:hover{background:var(--blue-dark)}
+  .btn.ghost{background:transparent;color:var(--blue-dark);border:2px solid var(--blue)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+  .mode{border:2px solid #e2e6ea;border-radius:14px;padding:16px;cursor:pointer;transition:.15s;background:#fff}
+  .mode:hover{border-color:var(--blue);transform:translateY(-2px)}
+  .mode h3{margin:0 0 6px;color:var(--blue-dark)}
+  .mode p{margin:0;font-size:.92rem;color:#445}
+  .hint{font-size:.9rem;color:var(--grey)}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+  table{border-collapse:collapse;font-size:.95rem;margin:8px 0}
+  th,td{border:1px solid #e2e6ea;padding:6px 10px;text-align:center}
+  th{background:#eef5f8;color:var(--blue-dark)}
+  .prompt{font-size:1.06rem;margin:0 0 10px}
+  .data{font-family:Consolas,Menlo,monospace;background:#f4f6f2;border:1px solid #e2e6ea;border-radius:10px;padding:10px 12px;font-size:1.05rem;letter-spacing:.03em;display:inline-block;margin:4px 0 10px}
+  .opts{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
+  .opt{border:2px solid #e2e6ea;border-radius:12px;padding:10px 12px;cursor:pointer;background:#fff;font-size:1rem;text-align:left}
+  .opt .lbl{display:inline-block;background:#eef5f8;color:var(--blue-dark);font-weight:700;border-radius:6px;padding:1px 8px;margin-right:8px}
+  .opt:hover{border-color:var(--blue)}
+  .opt.right{border-color:var(--ok);background:#f0faf4}
+  .opt.wrong{border-color:var(--bad);background:#fdf3f3}
+  .numin{display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap}
+  .numin input{font-size:1.15rem;padding:9px 12px;border:2px solid #cfd8de;border-radius:10px;width:170px}
+  .numin input:focus{outline:none;border-color:var(--blue)}
+  .feedback{display:none;border-radius:12px;padding:12px 14px;margin-top:12px;font-size:.98rem}
+  .feedback.ok{display:block;background:#f0faf4;border:1px solid var(--ok)}
+  .feedback.bad{display:block;background:#fdf3f3;border:1px solid var(--bad)}
+  .barwrap{height:8px;background:#dfe5e9;border-radius:99px;margin:10px 0 16px;overflow:hidden}
+  #bar{height:100%;width:0;background:var(--blue);transition:width .3s}
+  #results .badge{font-size:3rem}
+  #review td:first-child{text-align:left}
+  footer{text-align:center;color:var(--grey);font-size:.8rem;padding:14px}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>🚌 Shuttle Wait</h1><div class="sub">QUA 107 · Chapter 7 · The uniform distribution (LO 7.1)</div></div>
+  <div class="sub" style="text-align:right">King Saud University · College of Business Administration<br><a href="../../../index.html">QUA 107 course page</a> · <a href="../slides.html">Chapter 7 slides</a></div>
+</header>
+<div class="wrap">
+  <div id="menu">
+    <div class="panel"><p class="prompt"><b>Choose a round.</b> Every play generates new numbers, so you can practise as often as you like. Rounds cover the rectangle's height, base-times-height probabilities, the mean and spread, and honest advertising claims.</p>
+      <div class="modes" id="modeCards"></div>
+    </div>
+  </div>
+  <div id="game" style="display:none">
+    <div class="hud">
+      <div class="stat"><div class="lbl">Question</div><div class="val" id="caseNo">1</div></div>
+      <div class="stat"><div class="lbl">Score</div><div class="val" id="score">0</div></div>
+      <div class="stat"><div class="lbl">Streak</div><div class="val" id="streak">0</div></div>
+      <div class="stat" style="flex:1"><div class="lbl">Round</div><div class="val" id="roundName" style="font-size:1.05rem;padding-top:6px"></div></div>
+    </div>
+    <div class="barwrap"><div id="bar"></div></div>
+    <div class="panel">
+      <p class="prompt" id="prompt"></p>
+      <div id="stage"></div>
+      <div id="answerArea"></div>
+      <div class="feedback" id="fb"></div>
+      <div class="row" style="margin-top:14px">
+        <button class="btn ghost" onclick="menu()">◀ Rounds</button>
+        <button class="btn" id="nextBtn" onclick="next()" disabled>Next ▶</button>
+      </div>
+    </div>
+  </div>
+  <div id="results" style="display:none">
+    <div class="panel" style="text-align:center">
+      <div class="badge" id="badge"></div>
+      <p class="prompt" id="summary"></p>
+      <button class="btn" onclick="menu()">Play another round</button>
+    </div>
+    <div class="panel"><b>Review</b>
+      <table id="review" style="width:100%"><thead><tr><th>Question</th><th>Correct answer</th><th>Your answer</th></tr></thead><tbody></tbody></table>
+    </div>
+  </div>
+</div>
+<footer>QUA 107 · Introduction to Business Statistics · Practice game (not graded).</footer>
+<script>
+const $=id=>document.getElementById(id);
+const RY='<span class="sar">ê</span>';
+function ri(a,b){return a+Math.floor(Math.random()*(b-a+1))}
+function pick(a){return a[Math.floor(Math.random()*a.length)]}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function sampleDistinct(n,lo,hi){const s=new Set();while(s.size<n)s.add(ri(lo,hi));return [...s]}
+function fmt(x){return Math.abs(x-Math.round(x))<1e-9?String(Math.round(x)):x.toFixed(2).replace(/0$/,'').replace(/\\.$/,'')}
+function mean(a){return a.reduce((s,v)=>s+v,0)/a.length}
+function median(a){const s=a.slice().sort((x,y)=>x-y),n=s.length;return n%2?s[(n-1)/2]:(s[n/2-1]+s[n/2])/2}
+function dataBox(a){return '<div class="data">'+a.join(', ')+'</div>'}
+function sortedTable(a){let h='<tr><th>Position</th>'+a.map((_,i)=>'<th>'+(i+1)+'</th>').join('')+'</tr>';let r='<tr><td><b>Value</b></td>'+a.map(v=>'<td>'+v+'</td>').join('')+'</tr>';return '<table>'+h+r+'</table>'}
+
+
+function p4(x){return x.toFixed(4)}
+function p5(x){return x.toFixed(5)}
+function erf(x){ // Abramowitz-Stegun 7.1.26
+  const s=x<0?-1:1; x=Math.abs(x);
+  const t=1/(1+0.3275911*x);
+  const y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);
+  return s*y}
+function normCdf(z){return 0.5*(1+erf(z/Math.SQRT2))}
+function normInv(p){ // Acklam's rational approximation
+  const a=[-3.969683028665376e+01,2.209460984245205e+02,-2.759285104469687e+02,1.383577518672690e+02,-3.066479806614716e+01,2.506628277459239e+00];
+  const b=[-5.447609879822406e+01,1.615858368580409e+02,-1.556989798598866e+02,6.680131188771972e+01,-1.328068155288572e+01];
+  const c=[-7.784894002430293e-03,-3.223964580411365e-01,-2.400758277161838e+00,-2.549732539343734e+00,4.374664141464968e+00,2.938163982698783e+00];
+  const d=[7.784695709041462e-03,3.224671290700398e-01,2.445134137142996e+00,3.754408661907416e+00];
+  const pl=0.02425;
+  let q,r;
+  if(p<pl){q=Math.sqrt(-2*Math.log(p));
+    return (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1)}
+  if(p<=1-pl){q=p-0.5;r=q*q;
+    return (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1)}
+  q=Math.sqrt(-2*Math.log(1-p));
+  return -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1)}
+const INK='#0B5F86',KBLUE='#008DC3',GREY='#748995';
+function svgUniform(a,b,lo,hi,xlab){
+  const W=560,H=210,L=52,R=18,T=26,B=48;
+  const x0=a-(b-a)*0.12,x1=b+(b-a)*0.12;
+  const sx=v=>L+(W-L-R)*(v-x0)/(x1-x0);
+  const top=T+34,base=H-B;
+  let g='';
+  if(lo!==null){g+=`<rect x="${sx(lo)}" y="${top}" width="${sx(hi)-sx(lo)}" height="${base-top}" fill="${KBLUE}" fill-opacity="0.35"/>`}
+  g+=`<rect x="${sx(a)}" y="${top}" width="${sx(b)-sx(a)}" height="${base-top}" fill="${KBLUE}" fill-opacity="0.08"/>`;
+  g+=`<path d="M${sx(x0)},${base} H${sx(a)} V${top} H${sx(b)} V${base} H${sx(x1)}" fill="none" stroke="${INK}" stroke-width="2.5"/>`;
+  g+=`<line x1="${L-6}" y1="${base}" x2="${W-R+6}" y2="${base}" stroke="${INK}" stroke-width="1.5"/>`;
+  for(const v of [a,b,...(lo!==null?[lo,hi]:[])]){g+=`<line x1="${sx(v)}" y1="${base}" x2="${sx(v)}" y2="${base+5}" stroke="${INK}"/><text x="${sx(v)}" y="${base+20}" font-size="12" fill="${INK}" text-anchor="middle">${+v.toFixed(2)}</text>`}
+  g+=`<text x="${(L+W-R)/2}" y="${H-6}" font-size="12" fill="${GREY}" text-anchor="middle">${xlab}</text>`;
+  g+=`<text x="14" y="${(top+base)/2}" font-size="12" fill="${GREY}" text-anchor="middle" transform="rotate(-90 14 ${(top+base)/2})">Density</text>`;
+  g+=`<text x="${W-R}" y="${top-6}" font-size="12" fill="${KBLUE}" text-anchor="end">height 1/(b-a)</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" style="max-width:560px;width:100%">${g}</svg>`}
+function svgExpo(lam,lo,hi,xlab){
+  const W=560,H=210,L=52,R=18,T=20,B=48;
+  const xmax=4/lam;
+  const sx=v=>L+(W-L-R)*v/xmax;
+  const base=H-B,ymax=lam*1.08;
+  const sy=p=>base-(base-T)*(p/ymax);
+  const f=v=>lam*Math.exp(-lam*v);
+  let pts='';for(let i=0;i<=120;i++){const v=xmax*i/120;pts+=(i?' L':'M')+sx(v).toFixed(1)+','+sy(f(v)).toFixed(1)}
+  let g='';
+  if(lo!==null){let sp=`M${sx(lo)},${base} `;for(let i=0;i<=60;i++){const v=lo+(hi-lo)*i/60;sp+=`L${sx(v).toFixed(1)},${sy(f(v)).toFixed(1)} `}sp+=`L${sx(hi)},${base} Z`;
+    g+=`<path d="${sp}" fill="${KBLUE}" fill-opacity="0.35"/>`}
+  g+=`<path d="${pts}" fill="none" stroke="${INK}" stroke-width="2.5"/>`;
+  g+=`<line x1="${L-6}" y1="${base}" x2="${W-R+6}" y2="${base}" stroke="${INK}" stroke-width="1.5"/>`;
+  const tks=[0,xmax/4,xmax/2,xmax*3/4,xmax];
+  for(const v of tks){g+=`<line x1="${sx(v)}" y1="${base}" x2="${sx(v)}" y2="${base+5}" stroke="${INK}"/><text x="${sx(v)}" y="${base+20}" font-size="12" fill="${INK}" text-anchor="middle">${+v.toFixed(2)}</text>`}
+  g+=`<text x="${(L+W-R)/2}" y="${H-6}" font-size="12" fill="${GREY}" text-anchor="middle">${xlab}</text>`;
+  g+=`<text x="14" y="${(T+base)/2}" font-size="12" fill="${GREY}" text-anchor="middle" transform="rotate(-90 14 ${(T+base)/2})">Density</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" style="max-width:560px;width:100%">${g}</svg>`}
+function svgNormal(mu,sg,lo,hi,xlab){
+  const W=560,H=210,L=52,R=18,T=20,B=48;
+  const x0=mu-3.4*sg,x1=mu+3.4*sg;
+  const sx=v=>L+(W-L-R)*(v-x0)/(x1-x0);
+  const base=H-B,pk=Math.exp(0)/(sg*Math.sqrt(2*Math.PI))*1.08;
+  const f=v=>Math.exp(-0.5*Math.pow((v-mu)/sg,2))/(sg*Math.sqrt(2*Math.PI));
+  const sy=p=>base-(base-T)*(p/pk);
+  let pts='';for(let i=0;i<=140;i++){const v=x0+(x1-x0)*i/140;pts+=(i?' L':'M')+sx(v).toFixed(1)+','+sy(f(v)).toFixed(1)}
+  let g='';
+  if(lo!==null){const a=Math.max(lo,x0),b=Math.min(hi,x1);
+    let sp=`M${sx(a)},${base} `;for(let i=0;i<=70;i++){const v=a+(b-a)*i/70;sp+=`L${sx(v).toFixed(1)},${sy(f(v)).toFixed(1)} `}sp+=`L${sx(b)},${base} Z`;
+    g+=`<path d="${sp}" fill="${KBLUE}" fill-opacity="0.35"/>`}
+  g+=`<path d="${pts}" fill="none" stroke="${INK}" stroke-width="2.5"/>`;
+  g+=`<line x1="${L-6}" y1="${base}" x2="${W-R+6}" y2="${base}" stroke="${INK}" stroke-width="1.5"/>`;
+  g+=`<line x1="${sx(mu)}" y1="${base}" x2="${sx(mu)}" y2="${T+4}" stroke="${GREY}" stroke-width="1.5" stroke-dasharray="4 4"/>`;
+  for(let k=-3;k<=3;k++){const v=mu+k*sg;g+=`<line x1="${sx(v)}" y1="${base}" x2="${sx(v)}" y2="${base+5}" stroke="${INK}"/><text x="${sx(v)}" y="${base+20}" font-size="12" fill="${INK}" text-anchor="middle">${+v.toFixed(1)}</text>`}
+  g+=`<text x="${(L+W-R)/2}" y="${H-6}" font-size="12" fill="${GREY}" text-anchor="middle">${xlab}</text>`;
+  g+=`<text x="14" y="${(T+base)/2}" font-size="12" fill="${GREY}" text-anchor="middle" transform="rotate(-90 14 ${(T+base)/2})">Density</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" style="max-width:560px;width:100%">${g}</svg>`}
+
+const UCTX=[['the waiting time for the KSU shuttle','minutes',0,20,'Waiting time (minutes)'],
+ ['the waiting time for a metro','minutes',0,8,'Waiting time (minutes)'],
+ ['the hold time at a service desk','minutes',0,12,'Hold time (minutes)'],
+ ['the juice a machine pours into a cup','ml',200,250,'Fill volume (ml)'],
+ ['the dough a bakery machine cuts','grams',400,450,'Dough weight (grams)'],
+ ['the time a car wash takes','minutes',10,16,'Wash time (minutes)'],
+ ['the delivery window of an online store','minutes',30,60,'Delivery time (minutes)'],
+ ['the pipe length a cutter produces','cm',95,105,'Pipe length (cm)']];
+function gHeight(){
+  const [c,u,a,b,xl]=pick(UCTX);
+  const h=1/(b-a);
+  return {type:'num',prompt:`<b>Height Check.</b> <b>${c[0].toUpperCase()+c.slice(1)}</b> is uniform between a = ${a} and b = ${b} ${u}.<br>What is the height of the density rectangle? (4 decimals)`,
+    stage:svgUniform(a,b,null,null,xl),answer:+h.toFixed(4),tol:0.0006,hint:'The total area (base x height) must equal 1.',
+    why:`height = 1/(b - a) = 1/${b-a} = ${h.toFixed(4)}. The height is a density, not a probability; only areas are probabilities.`};
+}
+function gSlice(){
+  const [c,u,a,b,xl]=pick(UCTX);
+  const rng=b-a;
+  const kind=pick(['below','above','between']);
+  let lo,hi,ask;
+  if(kind==='below'){lo=a;hi=a+rng*pick([0.1,0.25,0.5]);ask=`BELOW ${+hi.toFixed(1)} ${u}`}
+  else if(kind==='above'){lo=a+rng*pick([0.5,0.75,0.9]);hi=b;ask=`ABOVE ${+lo.toFixed(1)} ${u}`}
+  else{lo=a+rng*pick([0.1,0.2,0.25]);hi=a+rng*pick([0.5,0.7,0.75]);ask=`BETWEEN ${+lo.toFixed(1)} and ${+hi.toFixed(1)} ${u}`}
+  const p=(hi-lo)/rng;
+  return {type:'num',prompt:`<b>Slice the Rectangle.</b> <b>${c[0].toUpperCase()+c.slice(1)}</b> is uniform between ${a} and ${b} ${u}.<br>P(value ${ask})? (2 decimals)`,
+    stage:svgUniform(a,b,lo,hi,xl),answer:+p.toFixed(2),tol:0.006,hint:'Base times height: the shaded area.',
+    why:`P = base x height = (${+hi.toFixed(1)} - ${+lo.toFixed(1)}) x 1/${rng} = ${p.toFixed(2)}: the shaded slice of the rectangle.`};
+}
+function gMeanSd(){
+  const [c,u,a,b,xl]=pick(UCTX);
+  const mu=(a+b)/2, sd=Math.sqrt((b-a)*(b-a)/12);
+  if(pick([true,false])) return {type:'num',prompt:`<b>Mean and Spread.</b> <b>${c[0].toUpperCase()+c.slice(1)}</b> is uniform between ${a} and ${b} ${u}.<br>What is the mean?`,
+    stage:svgUniform(a,b,null,null,xl),answer:+mu.toFixed(2),tol:0.005,unit:u,hint:'The rectangle balances in its middle.',
+    why:`mu = (a + b)/2 = (${a} + ${b})/2 = ${fmt(mu)} ${u}.`};
+  return {type:'num',prompt:`<b>Mean and Spread.</b> <b>${c[0].toUpperCase()+c.slice(1)}</b> is uniform between ${a} and ${b} ${u}.<br>What is the standard deviation? (2 decimals)`,
+    stage:svgUniform(a,b,null,null,xl),answer:+sd.toFixed(2),tol:0.006,unit:u,hint:'sigma = SQRT((b-a)^2 / 12).',
+    why:`sigma = SQRT((${b} - ${a})^2 / 12) = SQRT(${((b-a)*(b-a)/12).toFixed(2)}) = ${sd.toFixed(2)} ${u}.`};
+}
+function gClaim(){
+  const [c,u,a,b,xl]=pick(UCTX);
+  const rng=b-a;
+  const cut=a+rng*pick([0.2,0.25,0.3,0.4]);
+  const p=(cut-a)/rng;
+  const mu=(a+b)/2;
+  const okTxt=`False: only ${(p*100).toFixed(0)}% of values are below ${+cut.toFixed(1)}, and that is not "most".`;
+  const opts=shuffle([{html:okTxt,ok:true},
+    {html:`True: ${(p*100).toFixed(0)}% of values are below ${+cut.toFixed(1)}, which counts as "most".`,ok:false},
+    {html:'True: the mean is inside the range, so the claim holds.',ok:false},
+    {html:'It cannot be checked without more data.',ok:false}]);
+  return {type:'mc',prompt:`<b>Honest Claim.</b> <b>${c[0].toUpperCase()+c.slice(1)}</b> is uniform between ${a} and ${b} ${u}. A draft advertisement claims: <em>"Most values are below ${+cut.toFixed(1)} ${u}."</em><br>Is the claim honest?`,
+    stage:svgUniform(a,b,a,cut,xl),opts,
+    why:`P(below ${+cut.toFixed(1)}) = (${+cut.toFixed(1)} - ${a}) x 1/${rng} = ${p.toFixed(2)}: far from "most". The honest number to advertise is the mean, ${fmt(mu)} ${u}.`};
+}
+const MODES=[
+ {name:'Height Check',icon:'📐',desc:'Find the height 1/(b-a) that makes the area 1.',count:8,gen:[gHeight]},
+ {name:'Slice the Rectangle',icon:'🔪',desc:'Below, above, between: probability as base x height.',count:8,gen:[gSlice]},
+ {name:'Mean and Spread',icon:'⚖️',desc:'The middle (a+b)/2 and the spread SQRT((b-a)^2/12).',count:8,gen:[gMeanSd]},
+ {name:'Honest Claim',icon:'📢',desc:'Check an advertising claim against the distribution.',count:8,gen:[gClaim]},
+ {name:'Full Challenge',icon:'🏆',desc:'Fifteen mixed questions from all the rounds.',count:15,gen:[gHeight,gSlice,gMeanSd,gClaim]},
+];
+
+// ---------------- engine ----------------
+let deck=[],idx=0,score=0,streak=0,best=0,answered=false,log=[],roundTitle='';
+function buildMenu(){
+  $('modeCards').innerHTML=MODES.map((m,i)=>`<div class="mode" onclick="start(${i})"><h3>${m.icon} ${m.name}</h3><p>${m.desc}</p></div>`).join('');
+}
+function start(i){
+  const m=MODES[i]; roundTitle=m.name;
+  deck=[]; const gens=m.gen;
+  for(let k=0;k<m.count;k++) deck.push(pick(gens)());
+  idx=0;score=0;streak=0;best=0;log=[];
+  $('menu').style.display='none';$('results').style.display='none';$('game').style.display='block';
+  $('roundName').textContent=m.name; show();
+}
+function menu(){$('game').style.display='none';$('results').style.display='none';$('menu').style.display='block'}
+function show(){
+  const c=deck[idx]; answered=false; $('fb').className='feedback'; $('nextBtn').disabled=true; $('nextBtn').textContent='Next ▶';
+  $('caseNo').textContent=(idx+1)+' / '+deck.length; $('score').textContent=score; $('streak').textContent=streak;
+  $('bar').style.width=(idx/deck.length*100)+'%';
+  $('prompt').innerHTML=c.prompt; $('stage').innerHTML=c.stage||'';
+  if(c.type==='num'){
+    $('answerArea').innerHTML=`<div class="numin"><input id="numAns" type="number" step="any" placeholder="Your answer" onkeydown="if(event.key==='Enter')checkNum()"> ${c.unit||''} <button class="btn" onclick="checkNum()">Check</button></div><div class="hint">${c.hint||''}</div>`;
+    setTimeout(()=>$('numAns').focus(),50);
+  } else {
+    $('answerArea').innerHTML='<div class="opts">'+c.opts.map((op,i)=>`<div class="opt" onclick="answerMC(${i})"><span class="lbl">${'ABCD'[i]}</span>${op.html}</div>`).join('')+'</div>';
+  }
+}
+function grade(ok,mineTxt,correctTxt,why){
+  answered=true; const c=deck[idx];
+  if(ok){score+=1+(streak>=3?1:0);streak++;best=Math.max(best,streak);
+    $('fb').className='feedback ok';$('fb').innerHTML='✅ <b>Correct.</b> '+why+(streak>=3?' <em>Streak bonus +1!</em>':'');}
+  else{streak=0;$('fb').className='feedback bad';$('fb').innerHTML='❌ <b>Not quite.</b> The answer is <b>'+correctTxt+'</b>. '+why;}
+  log.push({q:c.prompt,correct:correctTxt,mine:mineTxt,ok});
+  $('score').textContent=score;$('streak').textContent=streak;
+  $('nextBtn').disabled=false;$('nextBtn').textContent=idx+1>=deck.length?'Finish ▶':'Next ▶';
+}
+function checkNum(){
+  if(answered)return; const c=deck[idx]; const v=parseFloat($('numAns').value);
+  if(isNaN(v)){$('fb').className='feedback bad';$('fb').innerHTML='Type a number first.';return}
+  const ok=Math.abs(v-c.answer)<=(c.tol!==undefined?c.tol:0.011);
+  grade(ok,fmt(v),fmt(c.answer),c.why);
+}
+function answerMC(i){
+  if(answered)return; const c=deck[idx];
+  const els=[...document.querySelectorAll('.opt')];
+  els[i].classList.add(c.opts[i].ok?'right':'wrong');
+  els[c.opts.findIndex(o=>o.ok)].classList.add('right');
+  grade(c.opts[i].ok, c.opts[i].html.replace(/<[^>]+>/g,''), c.opts.find(o=>o.ok).html.replace(/<[^>]+>/g,''), c.why);
+}
+function next(){idx++; if(idx>=deck.length){finish();return} show()}
+function finish(){
+  $('game').style.display='none';$('results').style.display='block';
+  const n=deck.length,right=log.filter(l=>l.ok).length,p=right/n;
+  $('badge').textContent=p>=.9?'🏆':p>=.7?'🥈':p>=.5?'🥉':'📘';
+  $('summary').innerHTML=`<b>${roundTitle}</b>: you solved <b>${right}</b> of ${n} (score ${score}, best streak ${best}). `+(p>=.9?'Excellent!':p>=.7?'Good. Check the review below.':'Keep practising: read the worked answers below, then play again.');
+  $('review').querySelector('tbody').innerHTML=log.map((l,i)=>`<tr><td>${i+1}. ${l.q.replace(/<[^>]+>/g,'').slice(0,90)}…</td><td>${l.correct}</td><td style="color:${l.ok?'#1f9d55':'#d64545'}">${l.ok?'✔':'✘'} ${l.mine}</td></tr>`).join('');
+}
+buildMenu();
+</script>
+</body>
+</html>
